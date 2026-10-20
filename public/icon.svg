@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Vynalth Lexicon Icon">
+  <rect width="128" height="128" rx="28" fill="#0f766e" />
+  <rect x="8" y="8" width="112" height="112" rx="22" fill="none" stroke="#5eead4" stroke-opacity="0.3" stroke-width="2" />
+  <path d="M36 34h16l12 40 12-40h16L71 94H57L36 34z" fill="#ffffff" />
+  <circle cx="94" cy="88" r="6" fill="#5eead4" />
+</svg>

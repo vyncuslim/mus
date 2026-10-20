@@ -1,0 +1,40 @@
+name: Vynalth Lexicon CI
+
+on:
+  push:
+    branches:
+      - main
+      - "arena/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-and-build:
+    name: Typecheck, Unit Tests, Importer & Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript strict typecheck
+        run: npm run typecheck
+
+      - name: Run Vitest unit & API tests
+        run: npm test
+
+      - name: Verify Wiktextract streaming JSONL import pipeline
+        run: npm run import:wiktextract -- --dry-run
+
+      - name: Run Next.js production build
+        run: npm run build
