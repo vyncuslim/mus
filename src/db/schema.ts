@@ -7,6 +7,7 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import type {
   LanguageCode,
@@ -27,6 +28,8 @@ export const lexiconEntriesTable = pgTable(
     normalizedHeadword: text("normalized_headword").notNull(),
     language: text("language").$type<LanguageCode>().notNull(),
     romanization: text("romanization"),
+    normalizedReading: text("normalized_reading"),
+    compactReading: text("compact_reading"),
     ipa: text("ipa"),
     audioLocale: text("audio_locale").notNull(),
     partsOfSpeech: jsonb("parts_of_speech").$type<PartOfSpeech[]>().notNull(),
@@ -52,10 +55,24 @@ export const lexiconEntriesTable = pgTable(
       table.normalizedHeadword
     ),
     index("idx_lexicon_normalized").on(table.normalizedHeadword),
+    index("idx_lexicon_normalized_prefix").on(table.normalizedHeadword.asc().op("text_pattern_ops")),
+    index("idx_lexicon_normalized_reading").on(table.normalizedReading.asc().op("text_pattern_ops")),
+    index("idx_lexicon_compact_reading").on(table.compactReading.asc().op("text_pattern_ops")),
     index("idx_lexicon_kata_dasar").on(table.kataDasar),
     index("idx_lexicon_featured").on(table.featured),
   ]
 );
+
+// Optional, bounded lookup index for imported forms, translations and synonyms.
+// Existing databases can add/backfill it without changing stored entry content.
+export const lexiconSearchKeysTable = pgTable("lexicon_search_keys", {
+  entryId: text("entry_id").notNull().references(() => lexiconEntriesTable.id, { onDelete: "cascade" }),
+  key: text("key").notNull(),
+  kind: text("kind").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.entryId, table.key, table.kind] }),
+  index("idx_lexicon_search_keys_prefix").on(table.key.asc().op("text_pattern_ops")),
+]);
 
 export const senseTranslationsTable = pgTable(
   "sense_translations",

@@ -34,6 +34,12 @@ export function getDb(): PostgresJsDatabase<typeof schema> | null {
   }
 }
 
+export async function closeDatabase(): Promise<void> {
+  if (cachedClient) await cachedClient.end();
+  cachedClient = null;
+  cachedDb = null;
+}
+
 export async function checkDatabaseHealth(): Promise<{
   configured: boolean;
   connected: boolean;

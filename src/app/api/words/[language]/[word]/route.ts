@@ -33,7 +33,8 @@ export async function GET(
     );
   }
 
-  const cleanedWord = decodeURIComponent(word || "").trim();
+  // Framework params are already decoded.
+  const cleanedWord = (word || "").trim();
   if (!cleanedWord || cleanedWord.length > 120) {
     return NextResponse.json(
       {

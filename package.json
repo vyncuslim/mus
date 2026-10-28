@@ -2,7 +2,7 @@
   "name": "vynalth-lexicon",
   "version": "1.0.0",
   "private": true,
-  "description": "Vynalth Lexicon — Production-Ready Multilingual Dictionary, Malay Morphology Analyzer, and Language Learning Platform",
+  "description": "Vynalth Dictionary — a focused multilingual dictionary using open Wiktionary data",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "import:wiktextract": "tsx scripts/import-wiktextract.ts",
+    "db:backfill-index": "tsx scripts/backfill-search-index.ts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push"
   },
@@ -27,7 +28,12 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwind-merge": "^3.0.1",
-    "zod": "^3.24.2"
+    "zod": "^4.6.7"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.12",

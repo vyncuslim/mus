@@ -16,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ language: string; word: string }>;
 }): Promise<Metadata> {
   const { language, word } = await params;
-  const decodedWord = decodeURIComponent(word || "");
+  const decodedWord = (word || "");
 
   if (!isValidLanguageCode(language)) {
     return {
@@ -65,7 +65,7 @@ export default async function WordDetailPage({
   params: Promise<{ language: string; word: string }>;
 }) {
   const { language, word } = await params;
-  const decodedWord = decodeURIComponent(word || "").trim();
+  const decodedWord = (word || "").trim();
 
   if (!isValidLanguageCode(language)) {
     return (

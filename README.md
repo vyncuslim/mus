@@ -1,110 +1,67 @@
-# Vynalth Lexicon (`mus`)
+# Vynalth Dictionary
 
-**Vynalth Lexicon** is a production-ready multilingual dictionary, sense-aligned translator, Bahasa Melayu morphological reference, and interactive language-learning web platform built with **Next.js App Router**, **React 19**, **TypeScript (strict mode)**, **Tailwind CSS**, and **PostgreSQL / Drizzle ORM**.
+A focused, multilingual dictionary built with Next.js, React, TypeScript and Tailwind. Search from the home page; results can include live Wiktionary definitions, a bundled definition snapshot, a curated local entry, or translation equivalents. The interface is available in Simplified Chinese, English and Malay. Learning, favorites and AI tools are not part of the dictionary interface; their old URLs redirect without deleting previously saved browser data.
 
----
+## Coverage and sources
 
-## 1. Product Capabilities
+Coverage varies substantially by language. These are actual counts for the checked-in artifacts, **not** claims to include every word or every word form:
 
-- **Multilingual Dictionary & Sense-Aligned Translation:**
-  - Look up verified headwords across 12 languages with definitions separated by numbered sense, sense-specific translations, IPA transcriptions, romanizations (Pinyin, Hepburn Romaji, Revised Romanization, RTGS, ALA-LC Arabic), synonyms, antonyms, word forms, and authentic example sentences.
-- **Bahasa Melayu Linguistic Excellence:**
-  - Structured grammatical and morphological breakdowns for:
-    - **Kata Dasar** (Root words: e.g., `makan`, `ajar`, `tulis`, `tapak`, `air`, `bahasa`, `ilmu`)
-    - **Kata Terbitan** (Derived words: e.g., `makanan`, `memakan`, `termakan`, `belajar`, `pelajar`, `mengajar`, `pengajaran`, `menulis`, `penulis`, `tulisan`, `telapak`)
-    - **Imbuhan:** *Awalan* (`meN-`, `beR-`, `teR-`, `peN-`), *Akhiran* (`-an`, `-kan`, `-i`), *Apitan* (`peN-...-an`, `ke-...-an`, `meN-...-kan`), and *Sisipan* (`-el-`, `-em-`, `-er-`, `-in-`)
-    - **Hukum Morfofonemik:** Explicit explanations of nasal substitution (*peluluhan konsonan sengau*: `/p/ → /m/`, `/t/ → /n/`, `/k/ → /ng/`, `/s/ → /ny/`) and special allomorphs (`bel-`, `pel-`)
-    - **Golongan Kata:** *Kata Nama*, *Kata Kerja*, *Kata Adjektif*, *Kata Sendi Nama* (`daripada`)
-    - **Peribahasa & Simpulan Bahasa:** Cultural proverbs (`bagai aur dengan tebing`) and idioms (`buah tangan`, `ulat buku`)
-    - **Penjodoh Bilangan:** Numeral classifiers (`sebuah`, `sehelai`) with compatible noun classes and examples
-- **Core Search Engine:**
-  - Exact matching, case-insensitive matching, Unicode NFC normalization, diacritic-insensitive matching (`cafe` → `café`, `espanol` → `español`, `worterbuch` → `Wörterbuch`), Arabic *tashkeel* stripping (`علم` → `عِلْم`), Pinyin/Romaji lookup (`xuexi` → `学习`, `taberu` → `食べる`), prefix matching, Malay root-word resolution, and bounded Damerau-Levenshtein typo-tolerant suggestions.
-  - Real measured query latency (`performance.now()`).
-- **Pronunciation:**
-  - IPA phonetic display + Web Speech API synthesis with automatic locale voice matching and transparent disclosure (*"Synthesized via Web Speech API — not a native speaker recording"*).
-- **Language Learning Studio (`/learn`) & Favorites (`/favorites`):**
-  - Interactive flashcards, multiple-choice vocabulary & morphology quizzes, curated study collections, and persistent `localStorage` favorites with personal study notes and JSON export.
-- **Database-Optional Deployment Resilience:**
-  - Connects to PostgreSQL via Drizzle ORM when `DATABASE_URL` is configured, and automatically falls back to the bundled 49-entry verified Wiktionary/Wiktextract starter dataset in read-only mode when `DATABASE_URL` is omitted or unreachable.
+| Source | Included data | What it provides |
+| --- | --- | --- |
+| [English Wiktionary](https://en.wiktionary.org/) | Live API, availability depends on network and source | Current definitions, examples and search suggestions where available |
+| [Vuizur/Wiktionary-Dictionaries](https://github.com/Vuizur/Wiktionary-Dictionaries/tree/be0cfb8d614470bc8b9d9006ddff8b921cd5c2e3), based on Wiktionary/Kaikki | **2,533,552** source entries with senses across **342 language categories**, from a **2023-05-19** snapshot | Backup definitions, generally in English; some source language categories include historical or constructed varieties |
+| [Methodox Multilingualism](https://github.com/MethodoxTech/Multilingualism/tree/fe427837f392a90f8d68a3e69c7c9f3c1f716bb9) | **519,230** non-machine translation pairs in **108 languages**, derived from **9,852 English headwords** | Translation equivalents, **not full definitions**. **544,786** machine-flagged source rows were excluded |
+| Curated starter set | **49** entries across **12** languages | Detailed entries, including selected Malay morphology, IPA and examples |
 
----
+The definition index stores 2,895,450 lookup keys, not 2,895,450 independent entries. To bound size, most inflected or alternative forms are omitted; where an indexed form matches a different headword, the result identifies the headword. A small, separately attributed 2026 Wiktionary seed covers `mengikut`. Existing spellings and roots are never generated by blindly stripping Malay affixes. Unicode normalization supports case, diacritics and Arabic vowel marks; the starter dataset also supports selected Pinyin/romanized readings. A missing result does not prove a word does not exist.
 
-## 2. Supported Languages & Coverage
+See [`data/wiktionary-definitions/README.md`](data/wiktionary-definitions/README.md) and [`data/world-lexicon/README.md`](data/world-lexicon/README.md) for exact dataset policy, pinned revisions and reproducible builds. The snapshot is approximately 88 MB compressed; plan deployment storage and memory accordingly.
 
-### Interface Localization (`src/lib/i18n.ts`)
-- **English (`en`)**
-- **Bahasa Melayu (`ms`)**
-- **Simplified Chinese (`zh-Hans`)**
+**Attribution and licences:** lexical content is by Wiktionary contributors. The Vuizur/Kaikki snapshot is provided under **CC BY-SA 3.0 / GFDL**; the Methodox translations are **CC BY-SA 4.0**. Results link to Wiktionary pages whose revision histories identify contributors. Retain attribution and applicable share-alike terms when reusing data. The source page in the app links to the upstream projects and licences.
 
-### Dictionary Language Registry (`src/lib/languages.ts`)
-| Language | Code | Script / Direction | Verified Starter Entries |
-| :--- | :--- | :--- | ---: |
-| Bahasa Melayu | `ms` | Latin (Rumi) · LTR | 25 |
-| English | `en` | Latin · LTR | 8 |
-| Simplified Chinese | `zh-Hans` | Simplified Han (汉字) · LTR | 4 |
-| Traditional Chinese | `zh-Hant` | Traditional Han (正體字) · LTR | 1 |
-| Indonesian | `id` | Latin · LTR | 2 |
-| Japanese | `ja` | Kanji / Kana · LTR | 2 |
-| Korean | `ko` | Hangul (한글) · LTR | 1 |
-| Thai | `th` | Thai (อักษรไทย) · LTR | 1 |
-| Arabic | `ar` | Arabic · **RTL** | 2 |
-| Spanish | `es` | Latin · LTR | 1 |
-| French | `fr` | Latin · LTR | 1 |
-| German | `de` | Latin · LTR | 1 |
-| **Total Starter Corpus** | **12 Languages** | **54 Senses · 512 Sense Translations** | **49** |
+## Development
 
----
-
-## 3. Reproducible Wiktionary / Wiktextract Import Pipeline
-
-Lexical entries are sourced from [Kaikki.org](https://kaikki.org/dictionary/) and [Wiktionary](https://en.wiktionary.org/) under **CC BY-SA 4.0 / GFDL**.
+Requires Node.js 22 or newer.
 
 ```bash
-# 1. Dry-run stream validation on the sample JSONL fixture
-npm run import:wiktextract -- --dry-run
-
-# 2. Selective import by language from a local Wiktextract JSONL file
-npm run import:wiktextract -- --input /path/to/kaikki.jsonl --lang ms,en,zh-Hans --version wiktextract-2026-10
-
-# 3. Push PostgreSQL schema & indexes via Drizzle Kit
-npm run db:push
-```
-
----
-
-## 4. API Endpoints
-
-- `GET /api/search?q=<query>&source=<lang|all>&target=<lang|all>&pos=<pos|all>&category=<cat|all>&limit=<1..100>`
-- `GET /api/words/[language]/[word]`
-- `GET /api/languages`
-- `GET /api/suggestions?q=<query>&lang=<lang|all>&limit=<1..20>`
-- `GET /api/health`
-
----
-
-## 5. Development, Testing & Deployment
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Run strict TypeScript check
+npm ci
+npm run dev -- --hostname 0.0.0.0 --port 3000
 npm run typecheck
-
-# Run Vitest unit & API tests
 npm test
-
-# Build production bundle
+npm run import:wiktextract -- --dry-run
 npm run build
-
-# Run Playwright E2E browser tests across Desktop (1440x900, 1920x1080) & Mobile (390x844, 375x667)
+npm run start -- --hostname 0.0.0.0 --port 3000
+# In another shell, after starting the server:
 npm run test:e2e
 ```
 
-### Vercel Deployment
-1. Connect the GitHub repository (`vyncuslim/mus`) to **Vercel** (Framework Preset: **Next.js**).
-2. *(Optional)* Configure `DATABASE_URL` in Vercel Project Settings → Environment Variables to connect a PostgreSQL database, or leave it unset to deploy immediately in Read-Only Verified Starter Lexicon mode.
-3. Set `NEXT_PUBLIC_SITE_URL` to your production domain.
+The app works without a database: the bundled dictionary indexes and curated starter entries are served locally. The browser requests live definitions and autocomplete directly from Wikimedia; these requests reveal the query to Wikimedia and may fail due to network or browser policy. Playback, where available, uses browser speech synthesis and is explicitly labeled as such, not as a native-speaker recording.
+
+The PWA caches the app shell and up to 100 visited same-origin runtime resources. Only previously cached pages and searches may work offline; **the full dictionary is not downloaded to the browser**. Search and detail APIs validate request parameters, and source markup is converted to inert text.
+
+## Optional PostgreSQL
+
+`DATABASE_URL` may point to a PostgreSQL database for the structured starter/imported entries. Back up existing databases before changing the schema. The large bundled definition and translation indexes are independent of PostgreSQL.
+
+```bash
+# Configure DATABASE_URL in .env.local, then apply schema/index changes.
+npm run db:push
+# Existing databases: fill normalized reading, form and translation lookup indexes.
+# Run while imports/writes are stopped. Safe to rerun.
+npm run db:backfill-index
+# Optional local Wiktextract import, after the schema is ready:
+npm run import:wiktextract -- --input /path/to/kaikki.jsonl --lang ms,en,zh-Hans --version YOUR_SOURCE_VERSION
+```
+
+Lookup issues indexed, bounded SQL candidate queries across the **whole** table; it no longer preloads only the first 2,000 rows. Exact and prefix candidate sets have limits, so response totals describe the retrieved candidates rather than a guaranteed global count. Reading, form and translation matches for preexisting records require the backfill. An older unmigrated schema can still perform headword lookup, but should be migrated for full support. If PostgreSQL is absent, empty or unreachable, the curated entry service falls back to the starter set.
+
+The importer is limited to the 12 structured-entry language codes and supported Wiktextract parts of speech. The separate bundled snapshot and translation index cover more language categories; their counts must not be conflated with structured entries. Import only appropriately licensed data and preserve provenance.
+
+## API overview
+
+- `GET /api/definitions?q=<word>&limit=<1..80>` — bundled definition snapshot and separately attributed seed.
+- `GET /api/world?q=<word>&lang=<code|all>&limit=<1..200>` — translation pairs and prefix suggestions.
+- `GET /api/search?q=<word>&source=<structured-code|all>&target=<structured-code|all>&limit=<1..100>` — curated or PostgreSQL entries, with optional POS/Malay filters.
+- `GET /api/words/[language]/[word]`, `/api/suggestions`, `/api/languages`, `/api/health` — structured entry details and status. The legacy structured language registry lists 12 codes; global snapshot and translation coverage is reported separately.
+
+A host must deploy the checked-in `data/` artifacts and support Node filesystem access; `next.config.ts` includes the compressed shards in output tracing. Set `NEXT_PUBLIC_SITE_URL` for canonical links. On serverless platforms, check function size and memory limits before deployment.

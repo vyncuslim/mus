@@ -2,7 +2,9 @@ import path from "node:path";
 import fs from "node:fs";
 import { sql } from "drizzle-orm";
 import { getDb, isDatabaseConfigured } from "../src/db";
-import { importBatchesTable, lexiconEntriesTable } from "../src/db/schema";
+import { importBatchesTable, lexiconEntriesTable, lexiconSearchKeysTable } from "../src/db/schema";
+import { eq } from "drizzle-orm";
+import { entrySearchKeys, readingKeys } from "../src/lib/entry-search-keys";
 import {
   mapWiktextractLangCode,
   streamImportWiktextractJsonl,
@@ -73,7 +75,8 @@ async function main() {
       console.log("\nUpserting validated records to PostgreSQL (idempotent)...");
       let inserted = 0;
       for (const entry of result.entries) {
-        await db
+        await db.transaction(async (tx) => {
+        const [saved] = await tx
           .insert(lexiconEntriesTable)
           .values({
             id: entry.id,
@@ -82,6 +85,7 @@ async function main() {
             normalizedHeadword: entry.normalizedHeadword,
             language: entry.language,
             romanization: entry.romanization ?? null,
+            ...readingKeys(entry.romanization),
             ipa: entry.ipa ?? null,
             audioLocale: entry.audioLocale,
             partsOfSpeech: entry.partsOfSpeech,
@@ -101,10 +105,22 @@ async function main() {
             set: {
               senses: sql`excluded.senses`,
               partsOfSpeech: sql`excluded.parts_of_speech`,
+              slug: sql`excluded.slug`,
+              normalizedHeadword: sql`excluded.normalized_headword`,
+              romanization: sql`excluded.romanization`,
+              normalizedReading: sql`excluded.normalized_reading`,
+              compactReading: sql`excluded.compact_reading`,
+              wordForms: sql`excluded.word_forms`,
+              kataDasar: sql`excluded.kata_dasar`,
+              malayMorphology: sql`excluded.malay_morphology`,
               provenance: sql`excluded.provenance`,
               updatedAt: new Date(),
             },
-          });
+          }).returning({ id: lexiconEntriesTable.id });
+        const searchKeys = entrySearchKeys({ ...entry, id: saved.id });
+        await tx.delete(lexiconSearchKeysTable).where(eq(lexiconSearchKeysTable.entryId, saved.id));
+        if (searchKeys.length) await tx.insert(lexiconSearchKeysTable).values(searchKeys).onConflictDoNothing();
+        });
         inserted++;
       }
 

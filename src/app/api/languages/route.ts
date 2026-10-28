@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { getDatasetCoverageSummary } from "@/data/starter-lexicon";
-import { getAllIndexedEntries } from "@/lib/dictionary-service";
+import { getIndexedCoverage } from "@/lib/dictionary-service";
+import definitionManifest from "../../../../data/wiktionary-definitions/manifest.json";
+import translationManifest from "../../../../data/world-lexicon/manifest.json";
 import { getAllLanguages, SUPPORTED_UI_LOCALES } from "@/lib/languages";
 
 export async function GET() {
-  const entries = await getAllIndexedEntries();
-  const coverage = getDatasetCoverageSummary(entries);
+  const coverage = await getIndexedCoverage();
   const languages = getAllLanguages().map((lang) => ({
     ...lang,
     verifiedHeadwordCount: coverage.countsByLanguage[lang.code] ?? 0,
@@ -16,6 +16,8 @@ export async function GET() {
     {
       languages,
       uiLocales: SUPPORTED_UI_LOCALES,
+      definitionSnapshot: { languageCategories: definitionManifest.sourceLanguageCategories, entries: definitionManifest.indexedEntries, snapshotDate: definitionManifest.sourceSnapshotDate },
+      translationIndex: { languages: translationManifest.languages, pairs: translationManifest.sourceTranslationPairs },
       summary: {
         totalVerifiedEntries: coverage.totalEntries,
         totalSenses: coverage.totalSenses,
