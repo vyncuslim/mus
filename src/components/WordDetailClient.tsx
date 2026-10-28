@@ -27,6 +27,7 @@ import {
   getLanguageMetadata,
 } from "@/lib/languages";
 import { PronunciationControl } from "./PronunciationControl";
+import { DefinitionLabels, DefinitionTranslationControls, TranslatedDefinition, providedDefinition, useDefinitionTranslation } from "./DefinitionTranslation";
 import type { LanguageCode, LexiconEntry } from "@/types/lexicon";
 
 interface WordDetailClientProps {
@@ -43,6 +44,8 @@ export function WordDetailClient({
   const { uiLocale, t } = useLexicon();
   const langMeta = getLanguageMetadata(entry.language);
   const languages = getAllLanguages();
+  const translator = useDefinitionTranslation(`detail:${entry.id}`, uiLocale);
+  const definitionLabels = DefinitionLabels(uiLocale);
 
   const [selectedTargetLang, setSelectedTargetLang] = useState<
     LanguageCode | "all"
@@ -398,8 +401,10 @@ export function WordDetailClient({
           </div>
         </div>
 
+        <DefinitionTranslationControls controller={translator} locale={uiLocale} texts={entry.senses.filter((sense) => !providedDefinition(sense, translator.target)).map((sense) => sense.definition)} />
         <div className="space-y-6">
           {entry.senses.map((sense) => {
+            const provided = providedDefinition(sense, translator.target);
             const filteredTranslations =
               selectedTargetLang === "all"
                 ? sense.translations
@@ -436,36 +441,18 @@ export function WordDetailClient({
                 {/* Sense Definitions */}
                 <div className="space-y-2">
                   <p className="text-base sm:text-lg font-medium text-ink-900 dark:text-white leading-relaxed">
-                    {sense.localizedDefinitions[uiLocale] || sense.definition}
+                    {provided || sense.definition}
                   </p>
+                  {provided && provided !== sense.definition && <p className="text-xs text-ink-500">{definitionLabels.provided} · {definitionLabels.original}: {sense.definition}</p>}
+                  {!provided && <TranslatedDefinition controller={translator} locale={uiLocale} text={sense.definition} />}
 
-                  {/* Show additional localized definitions for multilingual clarity */}
+                  {/* Additional source definitions, without repeating the selected or original text. */}
                   <div className="flex flex-col gap-1 text-xs sm:text-sm text-ink-600 dark:text-ink-400">
-                    {uiLocale !== "en" && sense.localizedDefinitions.en && (
-                      <p>
-                        <strong className="font-mono uppercase text-[11px] text-ink-400 mr-1.5">
-                          EN:
-                        </strong>
-                        {sense.localizedDefinitions.en}
-                      </p>
-                    )}
-                    {uiLocale !== "ms" && sense.localizedDefinitions.ms && (
-                      <p>
-                        <strong className="font-mono uppercase text-[11px] text-ink-400 mr-1.5">
-                          MS:
-                        </strong>
-                        {sense.localizedDefinitions.ms}
-                      </p>
-                    )}
-                    {uiLocale !== "zh-Hans" &&
-                      sense.localizedDefinitions["zh-Hans"] && (
-                        <p>
-                          <strong className="font-mono uppercase text-[11px] text-ink-400 mr-1.5">
-                            ZH:
-                          </strong>
-                          {sense.localizedDefinitions["zh-Hans"]}
-                        </p>
-                      )}
+                    {(["en", "ms", "zh-Hans"] as const).map((language) => {
+                      const extra = sense.localizedDefinitions[language];
+                      if (!extra || extra === provided || extra === sense.definition) return null;
+                      return <p key={language}><strong className="font-mono uppercase text-[11px] text-ink-400 mr-1.5">{language === "zh-Hans" ? "ZH" : language.toUpperCase()}:</strong>{extra}</p>;
+                    })}
                   </div>
                 </div>
 
