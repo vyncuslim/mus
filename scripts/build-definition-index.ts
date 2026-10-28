@@ -70,7 +70,7 @@ async function main() {
       rows.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1] || a[2] - b[2]);
       fs.writeFileSync(path.join(outputDir, "keys", `${shard}.json.gz`), gzipSync(JSON.stringify(rows), { level: 8 }));
     }
-  } finally { for (const fd of files) { try { fs.closeSync(fd); } catch {} } fs.rmSync(temp, { recursive: true, force: true }); }
+  } finally { for (const fd of files) { try { fs.closeSync(fd); } catch { /* A descriptor may already be closed. */ } } fs.rmSync(temp, { recursive: true, force: true }); }
   const manifest = { format: 1, sourceRevision: REVISION, sourceSnapshotDate: "2023-05-19", sourceLanguageCategories: source.files.length, indexedEntries, indexedKeys, sourceRows, skippedNoSenses, omittedExtraForms, maxExtraFormsPerEntry: MAX_EXTRA_FORMS, aliasPolicy: "Up to two additional source forms for dictionaries no larger than 1 MB and Indonesian; headwords only for other dictionaries.", languages };
   fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
   console.log(JSON.stringify({ ...manifest, languages: `${languages.length} language categories` }, null, 2));

@@ -52,7 +52,7 @@ export async function checkDatabaseHealth(): Promise<{
       connected: false,
       mode: "starter_dataset",
       message:
-        "DATABASE_URL is not configured; serving verified Wiktionary/Wiktextract starter dataset in read-only mode.",
+        "DATABASE_URL is not configured; serving the starter dataset in read-only mode.",
     };
   }
 
@@ -65,7 +65,7 @@ export async function checkDatabaseHealth(): Promise<{
         configured: true,
         connected: false,
         mode: "starter_dataset",
-        message: "Database client initialization failed; falling back to verified starter dataset.",
+        message: "Database client initialization failed; falling back to the starter dataset.",
       };
     }
     await cachedClient`SELECT 1`;
@@ -81,7 +81,7 @@ export async function checkDatabaseHealth(): Promise<{
       connected: false,
       mode: "starter_dataset",
       message:
-        "PostgreSQL connection unreachable; automatically serving verified starter dataset fallback.",
+        "PostgreSQL connection unreachable; automatically serving the starter dataset fallback.",
     };
   }
 }

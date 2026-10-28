@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkDatabaseHealth } from "@/db";
 import { getIndexedCoverage } from "@/lib/dictionary-service";
+import { reviewedTranslationCount } from "@/lib/reviewed-definitions";
 import definitionManifest from "../../../../data/wiktionary-definitions/manifest.json";
 import translationManifest from "../../../../data/world-lexicon/manifest.json";
 
@@ -23,7 +24,10 @@ export async function GET() {
       definitionSnapshot: { languageCategories: definitionManifest.sourceLanguageCategories, entries: definitionManifest.indexedEntries, snapshotDate: definitionManifest.sourceSnapshotDate },
       translationIndex: { languages: translationManifest.languages, pairs: translationManifest.sourceTranslationPairs },
       lexicon: {
-        totalVerifiedEntries: coverage.totalEntries,
+        totalEntries: coverage.totalEntries,
+        totalVerifiedEntries: null,
+        documentedDefinitionTranslationRecords: reviewedTranslationCount,
+        verificationNote: "Entry counts are not proof of individual review; the legacy verified-entry count is not measured.",
         languagesWithHeadwords: coverage.languagesWithHeadwords,
         sourceVersion: coverage.sourceVersion,
         license: coverage.license,

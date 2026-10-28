@@ -27,7 +27,8 @@ import {
   getLanguageMetadata,
 } from "@/lib/languages";
 import { PronunciationControl } from "./PronunciationControl";
-import { DefinitionLabels, DefinitionTranslationControls, TranslatedDefinition, providedDefinition, useDefinitionTranslation } from "./DefinitionTranslation";
+import { DefinitionTranslationControls, TranslatedDefinition, UnreviewedSourceDetails, useDefinitionTranslation } from "./DefinitionTranslation";
+import { curatedSubject } from "@/lib/reviewed-definitions";
 import type { LanguageCode, LexiconEntry } from "@/types/lexicon";
 
 interface WordDetailClientProps {
@@ -45,7 +46,6 @@ export function WordDetailClient({
   const langMeta = getLanguageMetadata(entry.language);
   const languages = getAllLanguages();
   const translator = useDefinitionTranslation(`detail:${entry.id}`, uiLocale);
-  const definitionLabels = DefinitionLabels(uiLocale);
 
   const [selectedTargetLang, setSelectedTargetLang] = useState<
     LanguageCode | "all"
@@ -94,7 +94,7 @@ export function WordDetailClient({
         <span className="text-xs font-mono text-ink-500 dark:text-ink-400">
           {dataSourceMode === "postgresql"
             ? "PostgreSQL Live Record"
-            : t.search.starterDatasetBadge}
+            : uiLocale === "zh-Hans" ? "精选词库（备用）" : uiLocale === "ms" ? "Kamus pilihan (sandaran)" : "Curated dictionary (fallback)"}
         </span>
       </div>
 
@@ -271,19 +271,11 @@ export function WordDetailClient({
           )}
 
           <div className="space-y-3 text-sm sm:text-base text-ink-800 dark:text-ink-200 leading-relaxed">
-            <p>
-              {uiLocale === "ms"
-                ? entry.malayMorphology.explanationMs
-                : uiLocale === "zh-Hans" &&
-                  entry.malayMorphology.explanationZh
-                ? entry.malayMorphology.explanationZh
-                : entry.malayMorphology.explanationEn}
-            </p>
-            {uiLocale !== "ms" && (
-              <p className="text-xs sm:text-sm text-ink-600 dark:text-ink-400 italic">
-                Huraian Bahasa Melayu: {entry.malayMorphology.explanationMs}
-              </p>
-            )}
+            <p lang="ms">{entry.malayMorphology.explanationMs}</p>
+            <UnreviewedSourceDetails key={translator.mode} locale={uiLocale} kind="notes">
+              <p lang="en">{entry.malayMorphology.explanationEn}</p>
+              {entry.malayMorphology.explanationZh && <p lang="zh-Hans" className="mt-2">{entry.malayMorphology.explanationZh}</p>}
+            </UnreviewedSourceDetails>
           </div>
 
           {entry.malayMorphology.morphophonemicRule && (
@@ -295,16 +287,9 @@ export function WordDetailClient({
             </div>
           )}
 
-          {entry.malayMorphology.literalMeaning && (
-            <div className="rounded-xl bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800 p-4 text-xs sm:text-sm">
-              <strong className="font-semibold text-ink-900 dark:text-white mr-2">
-                {t.wordDetail.literalMeaningLabel}:
-              </strong>
-              <span className="text-ink-700 dark:text-ink-300">
-                {entry.malayMorphology.literalMeaning}
-              </span>
-            </div>
-          )}
+          {entry.malayMorphology.literalMeaning && <UnreviewedSourceDetails key={translator.mode} locale={uiLocale} kind="notes">
+            <p className="text-xs sm:text-sm text-ink-700 dark:text-ink-300"><strong className="font-semibold mr-2">{t.wordDetail.literalMeaningLabel}:</strong>{entry.malayMorphology.literalMeaning}</p>
+          </UnreviewedSourceDetails>}
 
           {entry.malayMorphology.classifierUsage && (
             <div className="rounded-xl bg-white dark:bg-ink-950 border border-ink-200 dark:border-ink-800 p-4 space-y-3">
@@ -401,10 +386,9 @@ export function WordDetailClient({
           </div>
         </div>
 
-        <DefinitionTranslationControls controller={translator} locale={uiLocale} texts={entry.senses.filter((sense) => !providedDefinition(sense, translator.target)).map((sense) => sense.definition)} />
+        <DefinitionTranslationControls controller={translator} locale={uiLocale} subjects={entry.senses.map((sense) => curatedSubject(entry, sense))} />
         <div className="space-y-6">
           {entry.senses.map((sense) => {
-            const provided = providedDefinition(sense, translator.target);
             const filteredTranslations =
               selectedTargetLang === "all"
                 ? sense.translations
@@ -440,27 +424,17 @@ export function WordDetailClient({
 
                 {/* Sense Definitions */}
                 <div className="space-y-2">
-                  <p className="text-base sm:text-lg font-medium text-ink-900 dark:text-white leading-relaxed">
-                    {provided || sense.definition}
-                  </p>
-                  {provided && provided !== sense.definition && <p className="text-xs text-ink-500">{definitionLabels.provided} · {definitionLabels.original}: {sense.definition}</p>}
-                  {!provided && <TranslatedDefinition controller={translator} locale={uiLocale} text={sense.definition} />}
-
-                  {/* Additional source definitions, without repeating the selected or original text. */}
-                  <div className="flex flex-col gap-1 text-xs sm:text-sm text-ink-600 dark:text-ink-400">
-                    {(["en", "ms", "zh-Hans"] as const).map((language) => {
-                      const extra = sense.localizedDefinitions[language];
-                      if (!extra || extra === provided || extra === sense.definition) return null;
-                      return <p key={language}><strong className="font-mono uppercase text-[11px] text-ink-400 mr-1.5">{language === "zh-Hans" ? "ZH" : language.toUpperCase()}:</strong>{extra}</p>;
-                    })}
-                  </div>
+                  <p className="text-base sm:text-lg font-medium text-ink-900 dark:text-white leading-relaxed">{sense.definition}</p>
+                  <TranslatedDefinition controller={translator} locale={uiLocale} subject={curatedSubject(entry, sense)} />
+                  {Object.entries(sense.localizedDefinitions).some(([, value]) => value && value !== sense.definition) && <UnreviewedSourceDetails key={translator.mode} locale={uiLocale} kind="definitions" testId="source-definitions">
+                    <div className="flex flex-col gap-1 text-xs sm:text-sm text-ink-600 dark:text-ink-400">
+                      {Object.entries(sense.localizedDefinitions).map(([language, extra]) => extra && extra !== sense.definition && <p key={language} dir="auto"><strong className="font-mono uppercase text-[11px] text-ink-400 mr-1.5">{language}:</strong>{extra}</p>)}
+                    </div>
+                  </UnreviewedSourceDetails>}
                 </div>
 
                 {/* Sense-Aligned Translations */}
-                <div className="space-y-2.5 pt-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                    {t.wordDetail.translationsHeading}
-                  </h3>
+                <UnreviewedSourceDetails key={translator.mode} locale={uiLocale} kind="words" testId="source-sense-equivalents">
                   {filteredTranslations.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                       {filteredTranslations.map((tr) => {
@@ -498,13 +472,13 @@ export function WordDetailClient({
                     </div>
                   ) : (
                     <p
-                      data-testid="no-verified-translation-notice"
+                      data-testid="no-source-translation-notice"
                       className="text-xs sm:text-sm text-ink-500 italic bg-ink-50 dark:bg-ink-950 p-3 rounded-xl border border-ink-200 dark:border-ink-800"
                     >
-                      {t.wordDetail.noVerifiedTranslation}
+                      {uiLocale === "zh-Hans" ? "该词条没有符合筛选条件的词典对照。" : uiLocale === "ms" ? "Tiada padanan sumber untuk pilihan ini." : "No source equivalent matches this filter."}
                     </p>
                   )}
-                </div>
+                </UnreviewedSourceDetails>
 
                 {/* Authentic Example Sentences */}
                 {sense.examples.length > 0 && (
@@ -527,20 +501,9 @@ export function WordDetailClient({
                               {ex.romanization}
                             </p>
                           )}
-                          {Object.entries(ex.translations).map(
-                            ([langCode, trText]) => (
-                              <p
-                                key={langCode}
-                                dir="ltr"
-                                className="text-xs sm:text-sm text-ink-600 dark:text-ink-400"
-                              >
-                                <span className="font-mono text-[10px] uppercase text-ink-400 mr-1.5">
-                                  {langCode}:
-                                </span>
-                                {trText}
-                              </p>
-                            )
-                          )}
+                          {Object.keys(ex.translations).length > 0 && <UnreviewedSourceDetails key={translator.mode} locale={uiLocale} kind="examples" testId="source-example-translations">
+                            {Object.entries(ex.translations).map(([langCode, trText]) => <p key={langCode} dir="auto" className="text-xs sm:text-sm text-ink-600 dark:text-ink-400"><span className="font-mono text-[10px] uppercase text-ink-400 mr-1.5">{langCode}:</span>{trText}</p>)}
+                          </UnreviewedSourceDetails>}
                         </blockquote>
                       ))}
                     </div>

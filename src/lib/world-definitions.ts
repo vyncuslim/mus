@@ -1,5 +1,6 @@
-export interface DictionarySense { definition: string; examples: string[] }
+export interface DictionarySense { definition: string; examples: string[]; exampleTranslations?: string[] }
 export interface DictionaryDefinitionGroup {
+  sourceVersion?: string;
   languageCode: string;
   languageName: string;
   partOfSpeech: string;
@@ -36,18 +37,18 @@ export function parseWiktionaryDefinitions(payload: unknown): DictionaryDefiniti
         if (!raw || typeof raw !== "object") continue;
         const definition = text(raw.definition);
         if (!definition) continue;
-        const examples: string[] = [];
+        const examples: string[] = [], exampleTranslations: string[] = [];
         if (Array.isArray(raw.parsedExamples)) {
           for (const example of raw.parsedExamples) {
             if (!example || typeof example !== "object") continue;
             const original = text(example.example), translation = text(example.translation);
-            if (original) examples.push(translation ? `${original} — ${translation}` : original);
+            if (original) { examples.push(original); exampleTranslations.push(translation); }
             if (examples.length >= 3) break;
           }
         } else if (Array.isArray(raw.examples)) {
           for (const example of raw.examples) { const value = text(example); if (value) examples.push(value); if (examples.length >= 3) break; }
         }
-        senses.push({ definition, examples });
+        senses.push({ definition, examples, ...(exampleTranslations.some(Boolean) ? { exampleTranslations } : {}) });
       }
       if (senses.length) groups.push({ languageCode: code, languageName: text(item.language) || code, partOfSpeech: text(item.partOfSpeech), senses });
     }

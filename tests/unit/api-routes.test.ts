@@ -5,6 +5,7 @@ import { GET as getWord } from "@/app/api/words/[language]/[word]/route";
 import { GET as getLanguages } from "@/app/api/languages/route";
 import { GET as getSuggestions } from "@/app/api/suggestions/route";
 import { GET as getHealth } from "@/app/api/health/route";
+import { reviewedTranslationCount } from "@/lib/reviewed-definitions";
 
 describe("API Route Handlers", () => {
   it("GET /api/search returns 200 with verified matches and real latency", async () => {
@@ -59,7 +60,14 @@ describe("API Route Handlers", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.languages).toHaveLength(12);
-    expect(body.summary.totalVerifiedEntries).toBeGreaterThan(25);
+    expect(body.summary.totalEntries).toBeGreaterThan(25);
+    expect(body.summary.totalVerifiedEntries).toBeNull();
+    expect(body.summary.documentedDefinitionTranslationRecords).toBe(reviewedTranslationCount);
+    const english = body.languages.find((language: { code: string }) => language.code === "en");
+    expect(english.headwordCount).toBeGreaterThan(0);
+    expect(english.hasEntries).toBe(true);
+    expect(english.verifiedHeadwordCount).toBeNull();
+    expect(english.hasVerifiedEntries).toBeNull();
   });
 
   it("GET /api/suggestions validates input and returns prefix/typo suggestions", async () => {
@@ -82,5 +90,9 @@ describe("API Route Handlers", () => {
     const body = await res.json();
     expect(body.status).toBe("ok");
     expect(body.database.mode).toBe("starter_dataset");
+    expect(body.database.message).not.toMatch(/verified/i);
+    expect(body.lexicon.totalEntries).toBeGreaterThan(25);
+    expect(body.lexicon.totalVerifiedEntries).toBeNull();
+    expect(body.lexicon.documentedDefinitionTranslationRecords).toBe(reviewedTranslationCount);
   });
 });

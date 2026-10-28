@@ -39,7 +39,7 @@ export async function searchDefinitionIndex(query: string, limit = 60): Promise<
   for (const [, languageId, entryId, form] of records) {
     const info = manifest.languages[languageId], entry = byLanguage.get(languageId)?.[entryId]; if (!entry || !info) continue;
     const [headword, blocks] = entry, matchedForm = normalizeSearchKey(headword) !== key ? form || query : undefined;
-    for (const [partOfSpeech, senses] of blocks) groups.push({ languageCode: info.code, languageName: info.name, partOfSpeech, headword, ...(matchedForm ? { matchedForm } : {}), senses: senses.map((definition) => ({ definition, examples: [] })) });
+    for (const [partOfSpeech, senses] of blocks) groups.push({ sourceVersion: `wiktionary-snapshot-${manifest.sourceSnapshotDate}`, languageCode: info.code, languageName: info.name, partOfSpeech, headword, ...(matchedForm ? { matchedForm } : {}), senses: senses.map((definition) => ({ definition, examples: [] })) });
   }
   return { groups, totalMatches: totalMatches + exactSeeds.length, suggestions, coverage };
 }

@@ -4,6 +4,7 @@ import type { DictionaryDefinitionGroup } from "@/lib/world-definitions";
 // Kept separate from the older 2023 snapshot; never infer new Malay roots.
 export const RECENT_WIKTIONARY_SEEDS: DictionaryDefinitionGroup[] = [{
   headword: "mengikut",
+  sourceVersion: "wiktionary-check-2026-10-28",
   languageCode: "ms",
   languageName: "Malay",
   partOfSpeech: "Verb",

@@ -33,7 +33,7 @@ describe("bundled Wiktionary sources", () => {
     expect(cleanDictionaryText("An <i>example</i>.")).toBe("An example.");
     expect(cleanDictionaryText("An <i>example</i>.", true)).toBe("An example .");
     const parsed = parseWiktionaryDefinitions({ en: [{ language: "English", partOfSpeech: "Noun", definitions: [{ definition: "a <b>cat</b>", parsedExamples: [{ example: "a <i>cat</i>", translation: "猫" }] }] }] });
-    expect(parsed[0].senses[0]).toEqual({ definition: "a cat", examples: ["a cat — 猫"] });
+    expect(parsed[0].senses[0]).toEqual({ definition: "a cat", examples: ["a cat"], exampleTranslations: ["猫"] });
     expect(parseWiktionaryDefinitions({ en: "broken", fr: [null] })).toEqual([]);
   });
   it("validates the public index API limits and query parameters", async () => {

@@ -68,6 +68,11 @@ test.describe("Focused multilingual dictionary", () => {
   test("translation equivalents are labeled separately and can be filtered by language", async ({ page }) => {
     await blockWikimedia(page); await page.goto("/"); await search(page, "苹果");
     const translations = page.getByTestId("world-translation-index");
+    const sourceWords = page.getByTestId("source-word-equivalents");
+    await expect(sourceWords).not.toHaveAttribute("open");
+    await expect(sourceWords.locator("article").first()).toBeHidden();
+    await sourceWords.locator("summary").click();
+    await expect(sourceWords).toContainText("不代表已逐条人工核对");
     await expect(translations).toContainText("apple");
     await expect(translations).toContainText("并非完整释义");
     const filter = page.getByTestId("result-language-filter");
@@ -75,6 +80,8 @@ test.describe("Focused multilingual dictionary", () => {
     await expect(translations).toContainText("苹果");
     await search(page, "apple");
     await expect(page.getByTestId("world-translation-index")).toBeVisible();
+    await expect(page.getByTestId("source-word-equivalents")).not.toHaveAttribute("open");
+    await page.getByTestId("source-word-equivalents").locator("summary").click();
     await expect(page.getByTestId("world-translation-index").getByRole("link").first()).toHaveAttribute("href", /wiktionary\.org\/wiki\/apple/);
   });
 
@@ -89,11 +96,14 @@ test.describe("Focused multilingual dictionary", () => {
 
   test("live Wiktionary content is rendered as text with source attribution", async ({ page }) => {
     await page.route("https://en.wiktionary.org/w/api.php?**", (route) => route.fulfill({ json: ["test", [], [], []] }));
-    await page.route("https://en.wiktionary.org/api/rest_v1/page/definition/**", (route) => route.fulfill({ json: { en: [{ language: "English", partOfSpeech: "Noun", definitions: [{ definition: "A <b>fresh</b> meaning <script>bad()</script> &amp; example", parsedExamples: [{ example: "An <i>example</i>." }] }] }] } }));
+    await page.route("https://en.wiktionary.org/api/rest_v1/page/definition/**", (route) => route.fulfill({ json: { en: [{ language: "English", partOfSpeech: "Noun", definitions: [{ definition: "A <b>fresh</b> meaning <script>bad()</script> &amp; example", parsedExamples: [{ example: "An <i>example</i>.", translation: "示例译文" }] }] }] } }));
     await page.goto("/"); await search(page, "exampleliveword");
     const definitions = page.getByTestId("world-definitions");
     await expect(definitions).toContainText("A fresh meaning & example");
     await expect(definitions).toContainText("An example.");
+    await expect(definitions.getByText("示例译文")).toBeHidden();
+    await definitions.getByText("词典例句译文（未经逐条核对）").click();
+    await expect(definitions.getByText("示例译文")).toBeVisible();
     await expect(definitions).not.toContainText("bad()");
     await expect(definitions.getByRole("link").first()).toHaveAttribute("href", /en\.wiktionary\.org\/wiki\/exampleliveword/);
   });
@@ -115,11 +125,15 @@ test.describe("Focused multilingual dictionary", () => {
     await blockWikimedia(page); await page.goto("/sources");
     await expect(page.getByRole("heading", { name: "来源与许可" })).toBeVisible();
     await expect(page.getByText(/2,533,552/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "人工审核的释义译文" })).toBeVisible();
+    await expect(page.getByText(/目前共有 0 条/)).toBeVisible();
     await page.goto("/learn"); await expect(page).toHaveURL(/\/$/);
     await page.goto("/favorites"); await expect(page).toHaveURL(/\/$/);
     await search(page, "makanan"); await search(page, "kucing");
     await page.goBack(); await expect(page.getByTestId("result-query")).toHaveText("makanan");
     await expect(page.getByTestId("search-input")).toHaveValue("makanan");
+    await page.goto("/word/en/nonexistentwordxyz");
+    await expect(page.getByTestId("word-not-found-view")).toContainText("does not mean the word does not exist");
   });
 
   test("previously visited lookups work offline in a production build", async ({ page, context }) => {

@@ -113,20 +113,21 @@ export default async function WordDetailPage({
             <SearchX className="w-6 h-6" />
           </div>
           <h1 className="font-serif font-bold text-2xl sm:text-3xl text-ink-900 dark:text-white">
-            No verified record for &ldquo;{decodedWord}&rdquo; ({language})
+            No structured entry for &ldquo;{decodedWord}&rdquo; ({language})
           </h1>
           <p className="text-sm text-ink-600 dark:text-ink-400 max-w-lg mx-auto">
-            Vynalth Lexicon never fabricates unverified dictionary entries. This
-            headword is not yet present in the active {language.toUpperCase()}{" "}
-            starter dataset.
+            This headword was not found in the active {language.toUpperCase()}{" "}
+            structured dataset. That does not mean the word does not exist; try
+            searching the broader dictionary.
           </p>
 
           {ruleAnalysis && (
             <div className="rounded-2xl bg-lexicon-50 dark:bg-lexicon-950/60 border border-lexicon-200 dark:border-lexicon-800 p-5 text-left space-y-2 mt-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-lexicon-800 dark:text-lexicon-300">
                 <GitBranch className="w-4 h-4" />
-                <span>Verified Malay Root Analysis</span>
+                <span>Possible Malay root (rule-based)</span>
               </div>
+              <p className="text-xs text-ink-600 dark:text-ink-400">This is a possible analysis, not confirmation that the word or its derivation exists.</p>
               <p className="text-sm text-ink-800 dark:text-ink-200">
                 {ruleAnalysis.explanationEn}
               </p>

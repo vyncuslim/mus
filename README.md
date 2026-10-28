@@ -21,11 +21,12 @@ See [`data/wiktionary-definitions/README.md`](data/wiktionary-definitions/README
 
 ## Development
 
-Requires Node.js 22 or newer.
+Requires Node.js 22.13 or newer within the 22.x line, or Node.js 24 or newer.
 
 ```bash
 npm ci
 npm run dev -- --hostname 0.0.0.0 --port 3000
+npm run lint
 npm run typecheck
 npm test
 npm run import:wiktextract -- --dry-run
@@ -39,9 +40,24 @@ The app works without a database: the bundled dictionary indexes and curated sta
 
 ### Translating English definitions
 
-Choose a **definition language** and click **Translate definitions**. The menu offers 91 target-language choices in addition to the English original; availability and quality for each pair depend on the provider and are not guaranteed. Where a curated entry already contains a definition in the requested language, that original dictionary content is shown without a translation request. Other English definitions can be translated in batches of at most eight visible senses (approximately 2,000 input characters per batch); use **Translate more** for additional senses. Long definitions are split at paragraph and UTF-8-safe boundaries with a maximum of eight chunks; oversized definitions are left in the original language rather than truncated.
+Every lookup starts in **human-reviewed mode**. It displays a translated definition only when there is an exact, source-specific record with a translation source, licence, attribution, named reviewer, review date and evidence. **The checked-in review catalogue currently contains 0 records.** Existing localized starter definitions and Wiktionary word equivalents do not have item-level review records here and are therefore collapsed as explicitly unreviewed source data; they are not relabeled as reviewed. When no reviewed translation is available, the English definition remains visible. The original dictionary data and human-reviewed translations can both contain errors; neither mode promises perfection.
 
-This feature is **opt-in**: clicking Translate sends the English definitions directly from the browser to [MyMemory](https://mymemory.translated.net/doc/spec.php). The service may use machine translation or translation-memory matches; all output is labeled **automatic translation**, is not a verified dictionary definition, and can be inaccurate. The original English remains visible. Fuzzy matches to a different source sentence are not accepted. The third party sees the submitted text, target language and client IP; its [privacy terms](https://mymemory.translated.net/terms-and-conditions) say it may retain submitted segments long-term and share them with service partners. Its documented anonymous quota is [5,000 characters per day](https://mymemory.translated.net/doc/usagelimits.php) and may change or be shared with others on the same network; connectivity, CORS, quota and individual language support can fail. Only successful translations are cached in memory for the current page session; new translations require internet and are not available offline. Tests mock provider responses rather than depending on an external network.
+To use wider coverage, choose a **definition language**, select **Automatic (unreviewed)** and click **Translate definitions**. The menu offers 91 target-language choices in addition to the English original; availability and quality for each pair depend on the provider and are not guaranteed. The original English and any reviewed translations remain visible. Other English definitions can be translated in batches of at most eight visible senses (approximately 2,000 input characters per batch); use **Translate more** for additional senses. Long definitions are split at paragraph and UTF-8-safe boundaries with a maximum of eight chunks; oversized definitions are left in English rather than truncated. Switching back to reviewed mode hides automatic output and cancels a pending request. A new lookup defaults to reviewed mode again; the target language preference is saved locally.
+
+Automatic translation is **opt-in**: clicking Translate sends the English definitions directly from the browser to [MyMemory](https://mymemory.translated.net/doc/spec.php). The service may use machine translation or translation-memory matches; all output is labeled **automatic and unreviewed**, is not a verified dictionary definition, and can be inaccurate. Fuzzy matches to a different source sentence are not accepted. The third party sees the submitted text, target language and client IP; its [privacy terms](https://mymemory.translated.net/terms-and-conditions) say it may retain submitted segments long-term and share them with service partners. Its documented anonymous quota is [5,000 characters per day](https://mymemory.translated.net/doc/usagelimits.php) and may change or be shared with others on the same network; connectivity, CORS, quota and individual language support can fail. Only successful automatic translations are cached in memory for the current page session; new translations require internet and are not available offline. Tests mock provider responses rather than depending on an external network.
+
+### Adding a genuinely human-reviewed translation
+
+The static catalogue is [`data/reviewed-definition-translations.json`](data/reviewed-definition-translations.json); it is empty until actual reviews are available. Do not promote existing localized or machine-translated text merely because it is present, and do not invent reviewers or review evidence. A real reviewer must check the exact sense and target translation, source licensing and attribution, and create a durable review record. Add the record through a code-reviewed change, run `npm test`, and redeploy. The app has no public self-certification or administration endpoint.
+
+Each catalogue entry must follow `ReviewedTranslationSchema` in [`src/lib/reviewed-definitions.ts`](src/lib/reviewed-definitions.ts):
+
+- `subject`: `origin` (`curated`, `wiktionary-live`, or `wiktionary-snapshot`), exact `sourceUrl`, `sourceVersion`, `headword`, word `language`, `partOfSpeech`, English `definition`, and `senseId`. For curated records, `senseId` is `entry.id/sense.id`; for snapshot/live records it is an empty string. The live version is `live-exact-text`; snapshot versions are reported by the definition API, e.g. `wiktionary-snapshot-2023-05-19`. Every field must match the displayed sense; an unknown or changed version fails closed.
+- `target` is a supported target tag other than `en`; `translation` contains the reviewed text.
+- `source` contains the translation source `name`, HTTPS `url`, `license`, HTTPS `licenseUrl` and `attribution`.
+- `review` contains an identifiable human `reviewer`, a real non-future UTC `reviewedAt` date (`YYYY-MM-DD`), and an HTTPS `evidenceUrl` linking to the review record. Displayed results link to the English source, translation source, licence and review evidence.
+
+Validation rejects missing fields, unsafe links, impossible or future review dates, unsupported target languages and duplicate source-sense/target records. The Next.js build freezes the UTC review-date cutoff for both server and browser, rather than trusting a reader's device clock; tests also check the catalogue against the current UTC date. Validation checks metadata structure only: **software cannot authenticate reviewer identity, confirm that linked evidence supports the review, validate a licence, or guarantee translation accuracy**. A responsible human must verify all of those before publication. Tests contain synthetic review fixtures that are never shipped as actual reviews.
 
 The PWA caches the app shell and up to 100 visited same-origin runtime resources. Only previously cached pages and searches may work offline; **the full dictionary is not downloaded to the browser**. Search and detail APIs validate request parameters, and source markup is converted to inert text.
 
@@ -68,6 +84,6 @@ The importer is limited to the 12 structured-entry language codes and supported 
 - `GET /api/definitions?q=<word>&limit=<1..80>` — bundled definition snapshot and separately attributed seed.
 - `GET /api/world?q=<word>&lang=<code|all>&limit=<1..200>` — translation pairs and prefix suggestions.
 - `GET /api/search?q=<word>&source=<structured-code|all>&target=<structured-code|all>&limit=<1..100>` — curated or PostgreSQL entries, with optional POS/Malay filters.
-- `GET /api/words/[language]/[word]`, `/api/suggestions`, `/api/languages`, `/api/health` — structured entry details and status. The legacy structured language registry lists 12 codes; global snapshot and translation coverage is reported separately.
+- `GET /api/words/[language]/[word]`, `/api/suggestions`, `/api/languages`, `/api/health` — structured entry details and status. The legacy structured language registry lists 12 codes; global snapshot and translation coverage is reported separately. For `/api/languages`, use `headwordCount`, `hasEntries` and `summary.totalEntries`; for `/api/health`, use `lexicon.totalEntries`. The old `verifiedHeadwordCount`, `hasVerifiedEntries` and `totalVerifiedEntries` fields now return `null`: entry-level verification has not been measured, and the old counts did not establish it. Both endpoints separately report the number of documented definition-translation records.
 
 A host must deploy the checked-in `data/` artifacts and support Node filesystem access; `next.config.ts` includes the compressed shards in output tracing. Set `NEXT_PUBLIC_SITE_URL` for canonical links. On serverless platforms, check function size and memory limits before deployment.

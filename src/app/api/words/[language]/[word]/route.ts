@@ -56,7 +56,7 @@ export async function GET(
         language === "ms" ? analyzeMalayMorphology(cleanedWord) : null;
       return NextResponse.json(
         {
-          error: `No verified dictionary entry found for '${cleanedWord}' in '${language}'.`,
+          error: `No structured dictionary entry found for '${cleanedWord}' in '${language}'.`,
           code: "WORD_NOT_FOUND",
           ruleAnalysis,
         },
