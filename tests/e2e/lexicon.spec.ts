@@ -1,245 +1,140 @@
-import { test, expect } from "@playwright/test";
-import fs from "node:fs";
-import path from "node:path";
-import { STARTER_LEXICON_ENTRIES } from "../../src/data/starter-lexicon";
+import { test, expect, type Page } from "@playwright/test";
 
-const SCREENSHOT_DIR = path.resolve(process.cwd(), "test-results/screenshots");
+async function blockWikimedia(page: Page) {
+  await page.route("https://en.wiktionary.org/**", (route) => route.abort("failed"));
+}
+async function search(page: Page, query: string) {
+  const input = page.getByTestId("search-input");
+  await input.fill(query);
+  await input.press("Enter");
+  await expect(page.getByTestId("result-query")).toHaveText(query);
+}
 
-test.beforeAll(() => {
-  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
-});
-
-test.describe("Vynalth Lexicon — End-to-End Browser Verification", () => {
-  test("1. Home page rendering, UI localization, dark mode, language selectors & swap, and zero console errors", async ({
-    page,
-  }, testInfo) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") {
-        consoleErrors.push(msg.text());
-      }
-    });
-
+test.describe("Focused multilingual dictionary", () => {
+  test("home is responsive, localized, and has no study or favorites navigation", async ({ page }, testInfo) => {
+    await blockWikimedia(page);
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
-    await expect(page.getByTestId("hero-title")).toBeVisible();
-    await expect(page.getByTestId("verified-entry-count")).toHaveText(
-      String(STARTER_LEXICON_ENTRIES.length)
-    );
-
-    // Screenshot Home page
-    await page.screenshot({
-      path: path.join(SCREENSHOT_DIR, `home-${testInfo.project.name}.png`),
-      fullPage: false,
-    });
-
-    // Test UI localization switcher (English -> Bahasa Melayu -> Simplified Chinese -> English)
-    const uiSelector = page.getByTestId("ui-locale-selector");
-    await uiSelector.selectOption("ms");
-    await expect(page.getByTestId("hero-title")).toContainText(
-      "Ketepatan makna merentas bahasa"
-    );
-
-    await uiSelector.selectOption("zh-Hans");
-    await expect(page.getByTestId("hero-title")).toContainText(
-      "跨语言精准释义"
-    );
-
-    await uiSelector.selectOption("en");
-    await expect(page.getByTestId("hero-title")).toContainText(
-      "Clarity across languages"
-    );
-
-    // Test Dark Mode toggle
-    const themeToggle = page.getByTestId("theme-toggle");
-    await themeToggle.click();
+    await expect(page.getByTestId("hero-title")).toContainText("一个词");
+    await expect(page.getByTestId("search-input")).toBeVisible();
+    await expect(page.getByRole("link", { name: /favorites|收藏|learning|学习中心/i })).toHaveCount(0);
+    await page.getByTestId("ui-locale-selector").selectOption("en");
+    await expect(page.getByTestId("hero-title")).toContainText("One word");
+    await page.getByTestId("ui-locale-selector").selectOption("ms");
+    await expect(page.getByTestId("hero-title")).toContainText("Satu kata");
+    await page.getByTestId("ui-locale-selector").selectOption("zh-Hans");
+    await page.getByTestId("theme-toggle").click();
     await expect(page.locator("html")).toHaveClass(/dark/);
-    await themeToggle.click();
+    await page.getByTestId("theme-toggle").click();
     await expect(page.locator("html")).not.toHaveClass(/dark/);
-
-    // Test Source & Target Language Selectors and Swap
-    const sourceSelect = page.getByTestId("source-language-select");
-    const targetSelect = page.getByTestId("target-language-select");
-    await sourceSelect.selectOption("en");
-    await targetSelect.selectOption("ms");
-
-    await page.getByTestId("swap-languages-button").click();
-    await expect(sourceSelect).toHaveValue("ms");
-    await expect(targetSelect).toHaveValue("en");
-
-    // Verify Mobile Navigation on mobile viewports
-    const viewport = page.viewportSize();
-    if (viewport && viewport.width < 768) {
-      const mobileToggle = page.getByTestId("mobile-menu-toggle");
-      await expect(mobileToggle).toBeVisible();
-      await mobileToggle.click();
-      await expect(page.getByTestId("mobile-nav-drawer")).toBeVisible();
-      await mobileToggle.click();
-    }
-
-    expect(consoleErrors).toEqual([]);
+    const sizes = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth }));
+    expect(sizes.scrollWidth).toBeLessThanOrEqual(sizes.innerWidth + 1);
+    if (testInfo.project.name === "desktop-1440x900" || testInfo.project.name === "mobile-390x844") await page.screenshot({ path: `test-results/home-${testInfo.project.name}.png` });
+    expect(errors).toEqual([]);
   });
 
-  test("2. Malay, English, and Chinese word search, keyboard navigation, search history, and empty state", async ({
-    page,
-  }, testInfo) => {
-    await page.goto("/dictionary");
-
-    const searchInput = page.getByTestId("search-input");
-    const sourceSelect = page.getByTestId("source-language-select");
-
-    // Malay Search: makanan
-    await sourceSelect.selectOption("ms");
-    await searchInput.fill("makanan");
-    await searchInput.press("Enter");
-
-    await expect(
-      page.getByTestId("word-result-card-ms-makanan")
-    ).toBeVisible();
-    await expect(page.getByTestId("search-latency-badge")).toContainText("ms");
-
-    // Verify search history recorded 'makanan'
-    await expect(page.getByTestId("search-history-list")).toContainText(
-      "makanan"
-    );
-
-    // Screenshot Dictionary Search results
-    await page.screenshot({
-      path: path.join(
-        SCREENSHOT_DIR,
-        `dictionary-ms-${testInfo.project.name}.png`
-      ),
-      fullPage: false,
-    });
-
-    // Clear search button
-    await page.getByTestId("clear-search-button").click();
-    await expect(searchInput).toHaveValue("");
-
-    // English Search: serendipity
-    await sourceSelect.selectOption("en");
-    await searchInput.fill("serendipity");
-    await expect(
-      page.getByTestId("word-result-card-en-serendipity")
-    ).toBeVisible();
-
-    // Chinese Search: 学习
-    await sourceSelect.selectOption("zh-Hans");
-    await searchInput.fill("学习");
-    await expect(
-      page.getByTestId("word-result-card-zh-hans-xuexi")
-    ).toBeVisible();
-
-    // Keyboard navigation on suggestions (Escape closes dropdown)
-    await searchInput.focus();
-    await searchInput.press("ArrowDown");
-    await searchInput.press("Escape");
-
-    // Empty result & typo-tolerant suggestion check
-    await sourceSelect.selectOption("en");
-    await searchInput.fill("serendipiti");
-    await expect(page.getByTestId("empty-search-state")).toBeVisible();
-    await expect(page.getByTestId("empty-search-state")).toContainText(
-      "serendipity"
-    );
+  test("curated Malay details keep morphology, provenance and clearly labeled speech", async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: () => Promise.reject(new Error("denied")) } }));
+    await blockWikimedia(page); await page.goto("/"); await search(page, "makanan");
+    await expect(page.getByTestId("curated-matches")).toContainText("makanan");
+    await page.getByTestId("curated-matches").getByRole("link", { name: "makanan", exact: true }).click();
+    await expect(page.getByTestId("word-detail-headword")).toHaveText("makanan");
+    await expect(page.getByTestId("malay-morphology-section")).toContainText("makan");
+    await expect(page.getByTestId("word-provenance-card")).toContainText("CC BY-SA");
+    await expect(page.getByTestId("tts-disclaimer")).toBeVisible();
+    await page.getByTestId("copy-word-btn").click();
+    await expect(page.getByRole("status")).toContainText("复制失败");
+    await expect(page.getByTestId("word-detail-favorite-btn")).toHaveCount(0);
+    await expect(page.getByTestId("toggle-ai-note-btn")).toHaveCount(0);
+    await page.goto(`/word/ar/${encodeURIComponent("عِلْم")}`);
+    await expect(page.getByTestId("word-detail-headword")).toHaveText("عِلْم");
+    await page.goto(`/word/en/${encodeURIComponent("100%")}`);
+    await expect(page.getByTestId("word-not-found-view")).toContainText("100%");
+    const response = await page.request.get(`/api/words/en/${encodeURIComponent("100%")}`);
+    expect(response.status()).toBe(404);
   });
 
-  test("3. Word Detail page, Malay Morphology root navigation, Pronunciation, Favorites persistence, and RTL Arabic", async ({
-    page,
-  }, testInfo) => {
-    await page.goto("/word/ms/makanan");
+  test("the local snapshot supplies real definitions across scripts without Wikimedia", async ({ page }) => {
+    await blockWikimedia(page); await page.goto("/");
+    await search(page, "encyclopedia");
+    await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });
+    await search(page, "नमस्ते"); await expect(page.getByTestId("snapshot-definitions")).toContainText("greeting");
+    await search(page, "こんにちは"); await expect(page.getByTestId("snapshot-definitions")).toContainText("hello");
+    await search(page, "agua"); await expect(page.getByTestId("snapshot-definitions")).toContainText("water");
+    await expect(page.getByText(/在线维基词典/).first()).toBeVisible();
+  });
 
-    await expect(page.getByTestId("word-detail-headword")).toHaveText(
-      "makanan"
-    );
-    await expect(page.getByTestId("word-ipa")).toContainText("/ma.ka.nan/");
-    await expect(page.getByTestId("malay-morphology-section")).toBeVisible();
+  test("translation equivalents are labeled separately and can be filtered by language", async ({ page }) => {
+    await blockWikimedia(page); await page.goto("/"); await search(page, "苹果");
+    const translations = page.getByTestId("world-translation-index");
+    await expect(translations).toContainText("apple");
+    await expect(translations).toContainText("并非完整释义");
+    const filter = page.getByTestId("result-language-filter");
+    await expect(filter).toBeVisible(); await filter.selectOption("zh-Hans");
+    await expect(translations).toContainText("苹果");
+    await search(page, "apple");
+    await expect(page.getByTestId("world-translation-index")).toBeVisible();
+    await expect(page.getByTestId("world-translation-index").getByRole("link").first()).toHaveAttribute("href", /wiktionary\.org\/wiki\/apple/);
+  });
 
-    // Pronunciation control & honest non-native disclaimer
-    await expect(page.getByTestId("pronunciation-button")).toBeVisible();
-    await expect(page.getByTestId("tts-disclaimer")).toContainText(
-      "not a native speaker recording"
-    );
-    await page.getByTestId("pronunciation-button").click();
+  test("typos offer a verified suggestion rather than an invented definition", async ({ page }) => {
+    await blockWikimedia(page); await page.goto("/"); await search(page, "mangikut");
+    const empty = page.getByTestId("empty-search-state");
+    await expect(empty).toBeVisible({ timeout: 15_000 });
+    await empty.getByRole("button", { name: "mengikut" }).click();
+    await expect(page.getByTestId("result-query")).toHaveText("mengikut");
+    await expect(page.getByTestId("snapshot-definitions")).toContainText("active of ikut");
+  });
 
-    // Provenance card verification
-    await expect(page.getByTestId("word-provenance-card")).toContainText(
-      "CC BY-SA 4.0"
-    );
+  test("live Wiktionary content is rendered as text with source attribution", async ({ page }) => {
+    await page.route("https://en.wiktionary.org/w/api.php?**", (route) => route.fulfill({ json: ["test", [], [], []] }));
+    await page.route("https://en.wiktionary.org/api/rest_v1/page/definition/**", (route) => route.fulfill({ json: { en: [{ language: "English", partOfSpeech: "Noun", definitions: [{ definition: "A <b>fresh</b> meaning <script>bad()</script> &amp; example", parsedExamples: [{ example: "An <i>example</i>." }] }] }] } }));
+    await page.goto("/"); await search(page, "exampleliveword");
+    const definitions = page.getByTestId("world-definitions");
+    await expect(definitions).toContainText("A fresh meaning & example");
+    await expect(definitions).toContainText("An example.");
+    await expect(definitions).not.toContainText("bad()");
+    await expect(definitions.getByRole("link").first()).toHaveAttribute("href", /en\.wiktionary\.org\/wiki\/exampleliveword/);
+  });
 
-    // Optional AI-Assisted Study Note toggle
-    await page.getByTestId("toggle-ai-note-btn").click();
-    await expect(page.getByTestId("ai-study-note-content")).toBeVisible();
+  test("fast consecutive searches never replace the latest query or results", async ({ page }) => {
+    await blockWikimedia(page);
+    await page.route("**/api/definitions?**", async (route) => { const q = new URL(route.request().url()).searchParams.get("q"); if (q === "makanan") await new Promise((resolve) => setTimeout(resolve, 700)); await route.continue().catch(() => {}); });
+    await page.goto("/"); const input = page.getByTestId("search-input");
+    await input.fill("makanan"); await input.press("Enter"); await input.fill("kucing"); await input.press("Enter");
+    await expect(page.getByTestId("result-query")).toHaveText("kucing");
+    await expect(input).toHaveValue("kucing");
+    await expect(page.getByTestId("snapshot-definitions")).toContainText("cat", { timeout: 15_000 });
+    await page.waitForTimeout(1000);
+    await expect(page.getByTestId("result-query")).toHaveText("kucing"); await expect(input).toHaveValue("kucing");
+    await expect(page.getByTestId("snapshot-definitions")).not.toContainText("any solid substance");
+  });
 
-    // Save to Favorites & verify persistence across reload and on /favorites
-    await page.getByTestId("word-detail-favorite-btn").click();
+  test("sources, redirects, and browser history retain a dictionary-only experience", async ({ page }) => {
+    await blockWikimedia(page); await page.goto("/sources");
+    await expect(page.getByRole("heading", { name: "来源与许可" })).toBeVisible();
+    await expect(page.getByText(/2,533,552/)).toBeVisible();
+    await page.goto("/learn"); await expect(page).toHaveURL(/\/$/);
+    await page.goto("/favorites"); await expect(page).toHaveURL(/\/$/);
+    await search(page, "makanan"); await search(page, "kucing");
+    await page.goBack(); await expect(page.getByTestId("result-query")).toHaveText("makanan");
+    await expect(page.getByTestId("search-input")).toHaveValue("makanan");
+  });
+
+  test("previously visited lookups work offline in a production build", async ({ page, context }) => {
+    test.skip(process.env.TEST_OFFLINE !== "1", "Offline service-worker check runs against a production server");
+    await blockWikimedia(page); await page.goto("/");
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await page.reload();
-    await expect(page.getByTestId("word-detail-favorite-btn")).toContainText(
-      "Saved in Favorites"
-    );
-
-    // Screenshot Word Detail page
-    await page.screenshot({
-      path: path.join(
-        SCREENSHOT_DIR,
-        `word-detail-makanan-${testInfo.project.name}.png`
-      ),
-      fullPage: false,
-    });
-
-    // Navigate from 'makanan' to its Kata Dasar 'makan'
-    await page.getByTestId("kata-dasar-link").click();
-    await expect(page).toHaveURL(/\/word\/ms\/makan$/);
-    await expect(page.getByTestId("word-detail-headword")).toHaveText("makan");
-
-    // Check RTL rendering on Arabic entry
-    await page.goto("/word/ar/%D8%B9%D9%84%D9%85");
-    const arHeadword = page.getByTestId("word-detail-headword");
-    await expect(arHeadword).toHaveAttribute("dir", "rtl");
-
-    // Check Favorites page
-    await page.goto("/favorites");
-    await expect(page.getByTestId("favorites-list")).toContainText("makanan");
-  });
-
-  test("4. Learn Studio flashcards & quiz, API validation, database fallback, and link integrity", async ({
-    page,
-    request,
-  }) => {
-    await page.goto("/learn");
-    await expect(page.getByTestId("flashcard-card")).toBeVisible();
-
-    // Flip flashcard & mark known
-    await page.getByTestId("flip-flashcard-btn").click();
-    await expect(page.getByTestId("flashcard-back-content")).toBeVisible();
-    await page.getByTestId("mark-known-btn").click();
-    await expect(page.getByTestId("mastered-words-count")).toContainText(
-      "1 words"
-    );
-
-    // Switch to Quiz tab and answer a question
-    await page.getByTestId("tab-quiz").click();
-    await expect(page.getByTestId("quiz-panel")).toBeVisible();
-    await page.getByTestId("quiz-option-0").click();
-    await page.getByTestId("submit-quiz-answer-btn").click();
-    await expect(page.getByTestId("next-quiz-question-btn")).toBeVisible();
-
-    // Verify API validation and database fallback
-    const badSearch = await request.get("/api/search?source=invalid-code");
-    expect(badSearch.status()).toBe(400);
-
-    const badWord = await request.get("/api/words/invalid-code/makan");
-    expect(badWord.status()).toBe(400);
-
-    const health = await request.get("/api/health");
-    expect(health.status()).toBe(200);
-    const healthJson = await health.json();
-    expect(healthJson.database.mode).toBe("starter_dataset");
-
-    // Verify About and Sources pages render without broken internal links
-    for (const route of ["/about", "/sources"]) {
-      const resp = await page.goto(route);
-      expect(resp?.status()).toBe(200);
-      await expect(page.locator("h1")).toBeVisible();
-    }
+    await search(page, "encyclopedia");
+    await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });
+    await page.reload();
+    await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });
+    await context.setOffline(true);
+    await page.reload();
+    await expect(page.getByTestId("offline-banner")).toBeVisible();
+    await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });
+    await context.setOffline(false);
   });
 });

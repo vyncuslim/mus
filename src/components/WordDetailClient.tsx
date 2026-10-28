@@ -49,27 +49,30 @@ export function WordDetailClient({
   >("all");
   const [copiedWord, setCopiedWord] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
 
   const handleCopyWord = async () => {
+    setCopyFailed(false);
     try {
       await navigator.clipboard.writeText(entry.headword);
       setCopiedWord(true);
       setTimeout(() => setCopiedWord(false), 2000);
     } catch {
-      setCopiedWord(true);
-      setTimeout(() => setCopiedWord(false), 2000);
+      setCopyFailed(true);
+      setTimeout(() => setCopyFailed(false), 3000);
     }
   };
 
   const handleShareUrl = async () => {
+    setCopyFailed(false);
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
       setCopiedUrl(true);
       setTimeout(() => setCopiedUrl(false), 2000);
     } catch {
-      setCopiedUrl(true);
-      setTimeout(() => setCopiedUrl(false), 2000);
+      setCopyFailed(true);
+      setTimeout(() => setCopyFailed(false), 3000);
     }
   };
 
@@ -176,6 +179,7 @@ export function WordDetailClient({
                 </>
               )}
             </button>
+            {copyFailed && <span role="status" className="text-xs text-amber-700 dark:text-amber-400">{uiLocale === "zh-Hans" ? "复制失败，请手动复制。" : uiLocale === "ms" ? "Gagal menyalin; sila salin secara manual." : "Copy failed; please copy manually."}</span>}
           </div>
         </div>
       </section>

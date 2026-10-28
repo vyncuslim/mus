@@ -10,13 +10,19 @@ import { ArrowLeft, GitBranch, SearchX } from "lucide-react";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://vynalth-lexicon.vercel.app";
 
+// Next page route params can still be percent-encoded in production. Decode
+// once here, while keeping literal percent signs and malformed input safe.
+function decodePageWord(word: string): string {
+  try { return decodeURIComponent(word); } catch { return word; }
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ language: string; word: string }>;
 }): Promise<Metadata> {
   const { language, word } = await params;
-  const decodedWord = (word || "");
+  const decodedWord = decodePageWord(word || "");
 
   if (!isValidLanguageCode(language)) {
     return {
@@ -65,7 +71,7 @@ export default async function WordDetailPage({
   params: Promise<{ language: string; word: string }>;
 }) {
   const { language, word } = await params;
-  const decodedWord = (word || "").trim();
+  const decodedWord = decodePageWord(word || "").trim();
 
   if (!isValidLanguageCode(language)) {
     return (
@@ -178,7 +184,7 @@ export default async function WordDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <WordDetailClient
         entry={entry}

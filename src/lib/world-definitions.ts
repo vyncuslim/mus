@@ -9,8 +9,12 @@ export interface DictionaryDefinitionGroup {
 }
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ndash: "–", mdash: "—", lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”" };
 /** Convert source markup into inert text. React renders the result as text. */
-export function cleanDictionaryText(value: string): string {
-  return value.replace(/<(style|script)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ").replace(/<[^>]*>/g, " ")
+export function cleanDictionaryText(value: string, snapshotSpacing = false): string {
+  const withoutScripts = value.replace(/<(style|script)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ");
+  // Keep the snapshot builder byte-for-byte reproducible; live inline markup
+  // can be removed without inserting awkward spaces before punctuation.
+  const withoutTags = snapshotSpacing ? withoutScripts.replace(/<[^>]*>/g, " ") : withoutScripts.replace(/<\/?(?:br|p|div|li|ul|ol)\b[^>]*>/gi, " ").replace(/<[^>]*>/g, "");
+  return withoutTags
     .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, name: string) => {
       if (name[0] === "#") {
         const n = name[1].toLowerCase() === "x" ? Number.parseInt(name.slice(2), 16) : Number.parseInt(name.slice(1), 10);

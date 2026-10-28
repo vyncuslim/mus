@@ -78,7 +78,7 @@ export async function databaseWord(db: Database, language: LanguageCode, word: s
   return { entry, morphologyFamily };
 }
 export async function getWordEntry(language: LanguageCode, rawWord: string): Promise<{ entry: LexiconEntry | null; morphologyFamily: LexiconEntry[]; dataSourceMode: "postgresql" | "starter_dataset" }> {
-  // Next.js route params are already decoded; decoding again corrupts literal '%' words.
+  // Callers pass decoded words. Decoding again corrupts literal '%' words.
   const word = normalizeUnicode(rawWord), db = getDb();
   if (db) {
     try { const result = await databaseWord(db, language, word); if (result.entry || await hasRows(db)) return { ...result, dataSourceMode: "postgresql" }; } catch { /* fallback */ }

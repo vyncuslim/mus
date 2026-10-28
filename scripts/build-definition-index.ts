@@ -20,8 +20,8 @@ type Key = [string, number, number] | [string, number, number, string];
 function blocks(html: string): Block[] {
   const out: Block[] = [];
   for (const block of html.matchAll(/<i>([^<>]+)<\/i><br\s*\/?><ol>([\s\S]*?)<\/ol>/gi)) {
-    const senses = [...block[2].matchAll(/<li>([\s\S]*?)<\/li>/gi)].map((m) => cleanDictionaryText(m[1])).filter(Boolean).slice(0, 100);
-    if (senses.length) out.push([cleanDictionaryText(block[1]), senses]);
+    const senses = [...block[2].matchAll(/<li>([\s\S]*?)<\/li>/gi)].map((m) => cleanDictionaryText(m[1], true)).filter(Boolean).slice(0, 100);
+    if (senses.length) out.push([cleanDictionaryText(block[1], true), senses]);
   }
   return out;
 }

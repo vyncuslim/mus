@@ -7,6 +7,7 @@ import translationManifest from "../../../../data/world-lexicon/manifest.json";
 export async function GET() {
   const dbHealth = await checkDatabaseHealth();
   const coverage = await getIndexedCoverage();
+  const structuredMode = coverage.sourceName.startsWith("PostgreSQL entries") ? "postgresql" : "starter_dataset";
 
   return NextResponse.json(
     {
@@ -16,8 +17,8 @@ export async function GET() {
       database: {
         configured: dbHealth.configured,
         connected: dbHealth.connected,
-        mode: dbHealth.mode,
-        message: dbHealth.message,
+        mode: structuredMode,
+        message: dbHealth.connected && structuredMode === "starter_dataset" ? "PostgreSQL is connected but structured entries are unavailable or empty; serving starter data." : dbHealth.message,
       },
       definitionSnapshot: { languageCategories: definitionManifest.sourceLanguageCategories, entries: definitionManifest.indexedEntries, snapshotDate: definitionManifest.sourceSnapshotDate },
       translationIndex: { languages: translationManifest.languages, pairs: translationManifest.sourceTranslationPairs },

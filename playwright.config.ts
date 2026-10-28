@@ -3,9 +3,11 @@ import fs from "node:fs";
 
 const sparticuzExecPath = "/tmp/chromium";
 const sparticuzLibsPath = "/tmp/chromium-libs/lib:/tmp/chromium-libs";
+// The binary is unpacked by globalSetup after this config is evaluated.
 const useSparticuz =
   !process.env.PLAYWRIGHT_USE_SYSTEM_BROWSER &&
-  fs.existsSync(sparticuzExecPath);
+  process.platform === "linux" &&
+  fs.existsSync("node_modules/@sparticuz/chromium/bin");
 
 export default defineConfig({
   testDir: "./tests/e2e",

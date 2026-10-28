@@ -30,6 +30,8 @@ describe("bundled Wiktionary sources", () => {
   it("treats Wikimedia markup as inert text and tolerates malformed payloads", () => {
     expect(cleanDictionaryText('<script>alert(1)</script><a href="x">fish &amp; chips</a>')).toBe("fish & chips");
     expect(cleanDictionaryText('&#x1F431; &lt;strong&gt;cat&lt;/strong&gt;')).toBe("🐱 <strong>cat</strong>");
+    expect(cleanDictionaryText("An <i>example</i>.")).toBe("An example.");
+    expect(cleanDictionaryText("An <i>example</i>.", true)).toBe("An example .");
     const parsed = parseWiktionaryDefinitions({ en: [{ language: "English", partOfSpeech: "Noun", definitions: [{ definition: "a <b>cat</b>", parsedExamples: [{ example: "a <i>cat</i>", translation: "猫" }] }] }] });
     expect(parsed[0].senses[0]).toEqual({ definition: "a cat", examples: ["a cat — 猫"] });
     expect(parseWiktionaryDefinitions({ en: "broken", fr: [null] })).toEqual([]);
