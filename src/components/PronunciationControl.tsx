@@ -70,6 +70,11 @@ export function PronunciationControl({
 
         if (matchingVoice) {
           utterance.voice = matchingVoice;
+        } else if (voices.length > 0) {
+          // Never silently use a voice for an unrelated language.
+          setIsPlaying(false);
+          setStatusNote(t.wordDetail.ttsUnavailable);
+          return;
         }
 
         utterance.onstart = () => {
@@ -131,8 +136,9 @@ export function PronunciationControl({
           ) : (
             <VolumeX className="w-3.5 h-3.5" />
           )}
-          <span className="sr-only sm:not-sr-only">{locale}</span>
+          <span>{t.wordDetail.listenBrowserTts}</span>
         </button>
+        {statusNote && <span role="status" className="text-xs text-ink-500 dark:text-ink-400">{statusNote}</span>}
       </div>
     );
   }

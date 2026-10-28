@@ -71,7 +71,7 @@ const LexiconContext = createContext<LexiconContextValue | undefined>(
 );
 
 export function LexiconProvider({ children }: { children: React.ReactNode }) {
-  const [uiLocale, setUiLocaleState] = useState<UiLocale>("en");
+  const [uiLocale, setUiLocaleState] = useState<UiLocale>("zh-Hans");
   const [theme, setThemeState] = useState<"light" | "dark">("light");
   const [favorites, setFavorites] = useState<SavedFavorite[]>([]);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
@@ -86,6 +86,9 @@ export function LexiconProvider({ children }: { children: React.ReactNode }) {
       const storedLocale = window.localStorage.getItem(STORAGE_KEYS.UI_LOCALE);
       if (storedLocale && isValidUiLocale(storedLocale)) {
         setUiLocaleState(storedLocale);
+        document.documentElement.lang = storedLocale;
+      } else {
+        document.documentElement.lang = "zh-Hans";
       }
 
       const storedTheme = window.localStorage.getItem(STORAGE_KEYS.THEME);

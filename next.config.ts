@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   allowedDevOrigins: ["*.e2b.app", "localhost", "127.0.0.1"],
+  outputFileTracingIncludes: {
+    "/api/world": ["./data/world-lexicon/wiktionary-translations.json.gz"],
+    "/api/definitions": ["./data/wiktionary-definitions/**/*.json.gz"],
+  },
   async headers() {
     return [
       {

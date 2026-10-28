@@ -4,14 +4,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Bookmark,
   Check,
   Copy,
   ExternalLink,
   GitBranch,
   Share2,
   ShieldCheck,
-  Sparkles,
   BookOpen,
   Layers,
   Info,
@@ -42,23 +40,15 @@ export function WordDetailClient({
   morphologyFamily,
   dataSourceMode,
 }: WordDetailClientProps) {
-  const { uiLocale, t, isFavorite, toggleFavorite } = useLexicon();
+  const { uiLocale, t } = useLexicon();
   const langMeta = getLanguageMetadata(entry.language);
   const languages = getAllLanguages();
-  const saved = isFavorite(entry.id);
 
   const [selectedTargetLang, setSelectedTargetLang] = useState<
     LanguageCode | "all"
   >("all");
   const [copiedWord, setCopiedWord] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
-  const [showAiNote, setShowAiNote] = useState(false);
-
-  const primarySense = entry.senses[0];
-  const primaryDef =
-    primarySense?.localizedDefinitions[uiLocale] ||
-    primarySense?.definition ||
-    "";
 
   const handleCopyWord = async () => {
     try {
@@ -147,37 +137,8 @@ export function WordDetailClient({
             />
           </div>
 
-          {/* Action Toolbar: Favorite, Copy, Share */}
+          {/* Copy or share this entry */}
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                toggleFavorite({
-                  id: entry.id,
-                  word: entry.headword,
-                  slug: entry.slug,
-                  language: entry.language,
-                  romanization: entry.romanization,
-                  ipa: entry.ipa,
-                  partOfSpeech: entry.partsOfSpeech[0] ?? "noun",
-                  definition: primaryDef,
-                })
-              }
-              data-testid="word-detail-favorite-btn"
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-colors focus:outline-none focus:ring-2 focus:ring-lexicon-500 ${
-                saved
-                  ? "bg-lexicon-600 border-lexicon-600 text-white"
-                  : "bg-white dark:bg-ink-950 border-ink-200 dark:border-ink-700 text-ink-800 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-ink-800"
-              }`}
-            >
-              <Bookmark
-                className={`w-4 h-4 ${saved ? "fill-current" : ""}`}
-              />
-              <span>
-                {saved ? t.wordDetail.savedFavorite : t.wordDetail.saveFavorite}
-              </span>
-            </button>
-
             <button
               type="button"
               onClick={handleCopyWord}
@@ -696,55 +657,6 @@ export function WordDetailClient({
           )}
         </section>
       )}
-
-      {/* Optional AI-Assisted Study Note (Strictly Labeled & Separated) */}
-      <section className="rounded-2xl bg-ink-50 dark:bg-ink-900/60 border border-dashed border-ink-300 dark:border-ink-700 p-5 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">
-              {t.wordDetail.aiExplanationTitle}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowAiNote((prev) => !prev)}
-            data-testid="toggle-ai-note-btn"
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white dark:bg-ink-800 border border-ink-200 dark:border-ink-700 text-ink-800 dark:text-ink-200 hover:bg-ink-100 transition-colors"
-          >
-            {showAiNote ? "Hide AI Study Note" : t.wordDetail.aiExplanationButton}
-          </button>
-        </div>
-
-        <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
-          {t.wordDetail.aiExplanationDisclaimer}
-        </p>
-
-        {showAiNote && (
-          <div
-            data-testid="ai-study-note-content"
-            className="rounded-xl bg-white dark:bg-ink-950 border border-amber-200 dark:border-amber-800/80 p-4 text-xs sm:text-sm text-ink-700 dark:text-ink-300 space-y-2 leading-relaxed"
-          >
-            <p>
-              <strong>Study Synthesis for &ldquo;{entry.headword}&rdquo;:</strong>{" "}
-              This {getLanguageDisplayName(entry.language, "en")} headword
-              functions primarily as a{" "}
-              {entry.partsOfSpeech.join(" / ")}{" "}
-              {entry.malayMorphology
-                ? `derived from the root '${entry.malayMorphology.kataDasar}' (${entry.malayMorphology.affixPattern || "kata dasar"})`
-                : ""}{" "}
-              with {entry.senses.length} documented{" "}
-              {entry.senses.length === 1 ? "sense" : "senses"}.
-            </p>
-            <p>
-              <strong>Register & Collocation Tip:</strong> Compare each numbered
-              sense above when translating into another language, as semantic
-              range often differs between literal physical usage (Sense 1) and
-              figurative or idiomatic usage.
-            </p>
-          </div>
-        )}
-      </section>
 
       {/* Source & License Attribution Footer Card */}
       <section

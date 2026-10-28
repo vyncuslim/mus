@@ -1,19 +1,5 @@
-import React from "react";
-import { getDatasetCoverageSummary } from "@/data/starter-lexicon";
-import {
-  getAllIndexedEntries,
-  getFeaturedEntries,
-} from "@/lib/dictionary-service";
-import { HomeClient } from "@/components/HomeClient";
-
-export default async function HomePage() {
-  const [featuredEntries, allEntries] = await Promise.all([
-    getFeaturedEntries(8),
-    getAllIndexedEntries(),
-  ]);
-  const coverage = getDatasetCoverageSummary(allEntries);
-
-  return (
-    <HomeClient featuredEntries={featuredEntries} coverage={coverage} />
-  );
+import { Suspense } from "react";
+import { DictionaryExperience } from "@/components/DictionaryExperience";
+export default function HomePage() {
+  return <Suspense fallback={<div className="mx-auto max-w-3xl px-5 py-24 text-center text-sm text-ink-500">Loading dictionary…</div>}><DictionaryExperience /></Suspense>;
 }
