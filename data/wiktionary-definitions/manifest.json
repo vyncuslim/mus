@@ -1,0 +1,1725 @@
+{
+  "format": 1,
+  "sourceRevision": "be0cfb8d614470bc8b9d9006ddff8b921cd5c2e3",
+  "sourceSnapshotDate": "2023-05-19",
+  "sourceLanguageCategories": 342,
+  "indexedEntries": 2533552,
+  "indexedKeys": 2895450,
+  "sourceRows": 2598579,
+  "skippedNoSenses": 65027,
+  "omittedExtraForms": 31429682,
+  "maxExtraFormsPerEntry": 2,
+  "aliasPolicy": "Up to two additional source forms for dictionaries no larger than 1 MB and Indonesian; headwords only for other dictionaries.",
+  "languages": [
+    {
+      "name": "Abkhaz",
+      "code": "other",
+      "entries": 986
+    },
+    {
+      "name": "Adyghe",
+      "code": "ady",
+      "entries": 4567
+    },
+    {
+      "name": "Afar",
+      "code": "aa",
+      "entries": 1238
+    },
+    {
+      "name": "Afrikaans",
+      "code": "af",
+      "entries": 4171
+    },
+    {
+      "name": "Aghwan",
+      "code": "xag",
+      "entries": 535
+    },
+    {
+      "name": "Ainu",
+      "code": "other",
+      "entries": 517
+    },
+    {
+      "name": "Akkadian",
+      "code": "akk",
+      "entries": 518
+    },
+    {
+      "name": "Albanian",
+      "code": "sq",
+      "entries": 6550
+    },
+    {
+      "name": "Alemannic German",
+      "code": "other",
+      "entries": 1710
+    },
+    {
+      "name": "Amharic",
+      "code": "am",
+      "entries": 868
+    },
+    {
+      "name": "Amis",
+      "code": "ami",
+      "entries": 733
+    },
+    {
+      "name": "Ancient Greek",
+      "code": "grc",
+      "entries": 15628
+    },
+    {
+      "name": "Anguthimri",
+      "code": "awg",
+      "entries": 482
+    },
+    {
+      "name": "Arabic",
+      "code": "ar",
+      "entries": 15131
+    },
+    {
+      "name": "Aragonese",
+      "code": "an",
+      "entries": 883
+    },
+    {
+      "name": "Aramaic",
+      "code": "other",
+      "entries": 1749
+    },
+    {
+      "name": "Armenian",
+      "code": "hy",
+      "entries": 14806
+    },
+    {
+      "name": "Aromanian",
+      "code": "other",
+      "entries": 3011
+    },
+    {
+      "name": "Assamese",
+      "code": "as",
+      "entries": 3360
+    },
+    {
+      "name": "Assyrian Neo-Aramaic",
+      "code": "aii",
+      "entries": 1193
+    },
+    {
+      "name": "Asturian",
+      "code": "ast",
+      "entries": 5027
+    },
+    {
+      "name": "Avar",
+      "code": "other",
+      "entries": 490
+    },
+    {
+      "name": "Azerbaijani",
+      "code": "az",
+      "entries": 7714
+    },
+    {
+      "name": "Balinese",
+      "code": "ban",
+      "entries": 782
+    },
+    {
+      "name": "Baluchi",
+      "code": "bal",
+      "entries": 383
+    },
+    {
+      "name": "Bambara",
+      "code": "bm",
+      "entries": 650
+    },
+    {
+      "name": "Bashkir",
+      "code": "ba",
+      "entries": 2536
+    },
+    {
+      "name": "Basque",
+      "code": "eu",
+      "entries": 4265
+    },
+    {
+      "name": "Bavarian",
+      "code": "bar",
+      "entries": 415
+    },
+    {
+      "name": "Belarusian",
+      "code": "be",
+      "entries": 3489
+    },
+    {
+      "name": "Bengali",
+      "code": "bn",
+      "entries": 4839
+    },
+    {
+      "name": "Bikol Central",
+      "code": "other",
+      "entries": 4459
+    },
+    {
+      "name": "Bourguignon",
+      "code": "other",
+      "entries": 534
+    },
+    {
+      "name": "Breton",
+      "code": "br",
+      "entries": 1382
+    },
+    {
+      "name": "Brunei Malay",
+      "code": "kxd",
+      "entries": 405
+    },
+    {
+      "name": "Bulgarian",
+      "code": "bg",
+      "entries": 8251
+    },
+    {
+      "name": "Burmese",
+      "code": "my",
+      "entries": 5377
+    },
+    {
+      "name": "Buryat",
+      "code": "other",
+      "entries": 460
+    },
+    {
+      "name": "Cahuilla",
+      "code": "chl",
+      "entries": 463
+    },
+    {
+      "name": "Cantonese",
+      "code": "yue",
+      "entries": 1753
+    },
+    {
+      "name": "Cebuano",
+      "code": "ceb",
+      "entries": 11157
+    },
+    {
+      "name": "Central Atlas Tamazight",
+      "code": "tzm",
+      "entries": 583
+    },
+    {
+      "name": "Central Franconian",
+      "code": "other",
+      "entries": 688
+    },
+    {
+      "name": "Central Huasteca Nahuatl",
+      "code": "nch",
+      "entries": 735
+    },
+    {
+      "name": "Central Nahuatl",
+      "code": "nhn",
+      "entries": 1533
+    },
+    {
+      "name": "Chechen",
+      "code": "ce",
+      "entries": 810
+    },
+    {
+      "name": "Cherokee",
+      "code": "chr",
+      "entries": 1833
+    },
+    {
+      "name": "Chichewa",
+      "code": "ny",
+      "entries": 639
+    },
+    {
+      "name": "Chickasaw",
+      "code": "cic",
+      "entries": 653
+    },
+    {
+      "name": "Chinese",
+      "code": "zh",
+      "entries": 142182
+    },
+    {
+      "name": "Choctaw",
+      "code": "cho",
+      "entries": 459
+    },
+    {
+      "name": "Chuukese",
+      "code": "chk",
+      "entries": 700
+    },
+    {
+      "name": "Chuvash",
+      "code": "cv",
+      "entries": 671
+    },
+    {
+      "name": "Cimbrian",
+      "code": "cim",
+      "entries": 2531
+    },
+    {
+      "name": "Classical Nahuatl",
+      "code": "nci",
+      "entries": 2267
+    },
+    {
+      "name": "Classical Syriac",
+      "code": "syc",
+      "entries": 2335
+    },
+    {
+      "name": "Coptic",
+      "code": "cop",
+      "entries": 1878
+    },
+    {
+      "name": "Cornish",
+      "code": "kw",
+      "entries": 1422
+    },
+    {
+      "name": "Corsican",
+      "code": "co",
+      "entries": 569
+    },
+    {
+      "name": "Crimean Tatar",
+      "code": "crh",
+      "entries": 2222
+    },
+    {
+      "name": "Czech",
+      "code": "cs",
+      "entries": 34051
+    },
+    {
+      "name": "Dalmatian",
+      "code": "dlm",
+      "entries": 1010
+    },
+    {
+      "name": "Danish",
+      "code": "da",
+      "entries": 15006
+    },
+    {
+      "name": "Dhivehi",
+      "code": "dv",
+      "entries": 1007
+    },
+    {
+      "name": "Dupaningan Agta",
+      "code": "other",
+      "entries": 701
+    },
+    {
+      "name": "East Central German",
+      "code": "other",
+      "entries": 603
+    },
+    {
+      "name": "Eastern Huasteca Nahuatl",
+      "code": "nhe",
+      "entries": 564
+    },
+    {
+      "name": "Eastern Mari",
+      "code": "mhr",
+      "entries": 319
+    },
+    {
+      "name": "Egyptian Arabic",
+      "code": "arz",
+      "entries": 516
+    },
+    {
+      "name": "Emilian",
+      "code": "egl",
+      "entries": 514
+    },
+    {
+      "name": "English",
+      "code": "en",
+      "entries": 461807
+    },
+    {
+      "name": "Erzya",
+      "code": "myv",
+      "entries": 641
+    },
+    {
+      "name": "Esperanto",
+      "code": "eo",
+      "entries": 17836
+    },
+    {
+      "name": "Estonian",
+      "code": "et",
+      "entries": 5640
+    },
+    {
+      "name": "Evenki",
+      "code": "evn",
+      "entries": 509
+    },
+    {
+      "name": "Ewe",
+      "code": "ee",
+      "entries": 521
+    },
+    {
+      "name": "Faroese",
+      "code": "fo",
+      "entries": 4690
+    },
+    {
+      "name": "Fijian",
+      "code": "fj",
+      "entries": 413
+    },
+    {
+      "name": "Franco-Provençal",
+      "code": "other",
+      "entries": 430
+    },
+    {
+      "name": "French",
+      "code": "fr",
+      "entries": 79348
+    },
+    {
+      "name": "Friulian",
+      "code": "fur",
+      "entries": 1746
+    },
+    {
+      "name": "Fula",
+      "code": "other",
+      "entries": 790
+    },
+    {
+      "name": "Galician",
+      "code": "gl",
+      "entries": 13529
+    },
+    {
+      "name": "Gamilaraay",
+      "code": "kld",
+      "entries": 579
+    },
+    {
+      "name": "Garo",
+      "code": "grt",
+      "entries": 950
+    },
+    {
+      "name": "Ge'ez",
+      "code": "other",
+      "entries": 348
+    },
+    {
+      "name": "Georgian",
+      "code": "ka",
+      "entries": 14715
+    },
+    {
+      "name": "German Low German",
+      "code": "other",
+      "entries": 729
+    },
+    {
+      "name": "German",
+      "code": "de",
+      "entries": 70406
+    },
+    {
+      "name": "Gothic",
+      "code": "got",
+      "entries": 15889
+    },
+    {
+      "name": "Greek",
+      "code": "el",
+      "entries": 31697
+    },
+    {
+      "name": "Greenlandic",
+      "code": "other",
+      "entries": 1622
+    },
+    {
+      "name": "Guaraní",
+      "code": "other",
+      "entries": 460
+    },
+    {
+      "name": "Gujarati",
+      "code": "gu",
+      "entries": 3203
+    },
+    {
+      "name": "Gulf Arabic",
+      "code": "afb",
+      "entries": 524
+    },
+    {
+      "name": "Haitian Creole",
+      "code": "ht",
+      "entries": 1232
+    },
+    {
+      "name": "Hausa",
+      "code": "ha",
+      "entries": 1571
+    },
+    {
+      "name": "Hawaiian",
+      "code": "haw",
+      "entries": 1602
+    },
+    {
+      "name": "Hebrew",
+      "code": "he",
+      "entries": 9505
+    },
+    {
+      "name": "Hijazi Arabic",
+      "code": "acw",
+      "entries": 902
+    },
+    {
+      "name": "Hiligaynon",
+      "code": "hil",
+      "entries": 1555
+    },
+    {
+      "name": "Hindi",
+      "code": "hi",
+      "entries": 13512
+    },
+    {
+      "name": "Hungarian",
+      "code": "hu",
+      "entries": 33579
+    },
+    {
+      "name": "Hunsrik",
+      "code": "hrx",
+      "entries": 1336
+    },
+    {
+      "name": "Iban",
+      "code": "iba",
+      "entries": 618
+    },
+    {
+      "name": "Icelandic",
+      "code": "is",
+      "entries": 16077
+    },
+    {
+      "name": "Ido",
+      "code": "io",
+      "entries": 6438
+    },
+    {
+      "name": "Ilocano",
+      "code": "other",
+      "entries": 805
+    },
+    {
+      "name": "Inari Sami",
+      "code": "smn",
+      "entries": 540
+    },
+    {
+      "name": "Indonesian",
+      "code": "id",
+      "entries": 12529
+    },
+    {
+      "name": "Ingrian",
+      "code": "izh",
+      "entries": 2308
+    },
+    {
+      "name": "Interlingua",
+      "code": "other",
+      "entries": 2122
+    },
+    {
+      "name": "Inupiaq",
+      "code": "ik",
+      "entries": 517
+    },
+    {
+      "name": "Irish",
+      "code": "ga",
+      "entries": 18121
+    },
+    {
+      "name": "Italian",
+      "code": "it",
+      "entries": 114406
+    },
+    {
+      "name": "Japanese",
+      "code": "ja",
+      "entries": 94610
+    },
+    {
+      "name": "Javanese",
+      "code": "jv",
+      "entries": 1942
+    },
+    {
+      "name": "Jeju",
+      "code": "other",
+      "entries": 1014
+    },
+    {
+      "name": "Kabardian",
+      "code": "kbd",
+      "entries": 870
+    },
+    {
+      "name": "Kabuverdianu",
+      "code": "kea",
+      "entries": 1034
+    },
+    {
+      "name": "Kalasha",
+      "code": "kls",
+      "entries": 417
+    },
+    {
+      "name": "Kannada",
+      "code": "kn",
+      "entries": 1410
+    },
+    {
+      "name": "Kapampangan",
+      "code": "other",
+      "entries": 545
+    },
+    {
+      "name": "Karao",
+      "code": "kyj",
+      "entries": 917
+    },
+    {
+      "name": "Karelian",
+      "code": "krl",
+      "entries": 789
+    },
+    {
+      "name": "Kashmiri",
+      "code": "ks",
+      "entries": 1332
+    },
+    {
+      "name": "Kashubian",
+      "code": "csb",
+      "entries": 863
+    },
+    {
+      "name": "Kavalan",
+      "code": "ckv",
+      "entries": 819
+    },
+    {
+      "name": "Kazakh",
+      "code": "kk",
+      "entries": 8145
+    },
+    {
+      "name": "Khmer",
+      "code": "km",
+      "entries": 6768
+    },
+    {
+      "name": "Kikuyu",
+      "code": "ki",
+      "entries": 1044
+    },
+    {
+      "name": "Komi-Zyrian",
+      "code": "kpv",
+      "entries": 806
+    },
+    {
+      "name": "Konkani",
+      "code": "other",
+      "entries": 408
+    },
+    {
+      "name": "Korean",
+      "code": "ko",
+      "entries": 33840
+    },
+    {
+      "name": "Kumyk",
+      "code": "kum",
+      "entries": 1133
+    },
+    {
+      "name": "Kyrgyz",
+      "code": "ky",
+      "entries": 2088
+    },
+    {
+      "name": "Ladin",
+      "code": "lld",
+      "entries": 1410
+    },
+    {
+      "name": "Ladino",
+      "code": "lad",
+      "entries": 1526
+    },
+    {
+      "name": "Lakota",
+      "code": "lkt",
+      "entries": 474
+    },
+    {
+      "name": "Lao",
+      "code": "lo",
+      "entries": 1841
+    },
+    {
+      "name": "Latgalian",
+      "code": "ltg",
+      "entries": 355
+    },
+    {
+      "name": "Latin",
+      "code": "la",
+      "entries": 37309
+    },
+    {
+      "name": "Latvian",
+      "code": "lv",
+      "entries": 16337
+    },
+    {
+      "name": "Laz",
+      "code": "lzz",
+      "entries": 1016
+    },
+    {
+      "name": "Ligurian",
+      "code": "lij",
+      "entries": 844
+    },
+    {
+      "name": "Limburgish",
+      "code": "other",
+      "entries": 549
+    },
+    {
+      "name": "Lindu",
+      "code": "other",
+      "entries": 595
+    },
+    {
+      "name": "Lingala",
+      "code": "ln",
+      "entries": 361
+    },
+    {
+      "name": "Lithuanian",
+      "code": "lt",
+      "entries": 6994
+    },
+    {
+      "name": "Livonian",
+      "code": "other",
+      "entries": 660
+    },
+    {
+      "name": "Livvi",
+      "code": "olo",
+      "entries": 457
+    },
+    {
+      "name": "Lombard",
+      "code": "lmo",
+      "entries": 483
+    },
+    {
+      "name": "Louisiana Creole French",
+      "code": "other",
+      "entries": 549
+    },
+    {
+      "name": "Low German",
+      "code": "nds",
+      "entries": 591
+    },
+    {
+      "name": "Lower Sorbian",
+      "code": "dsb",
+      "entries": 1391
+    },
+    {
+      "name": "Lule Sami",
+      "code": "smj",
+      "entries": 739
+    },
+    {
+      "name": "Lushootseed",
+      "code": "lut",
+      "entries": 659
+    },
+    {
+      "name": "Luxembourgish",
+      "code": "lb",
+      "entries": 5576
+    },
+    {
+      "name": "Lü",
+      "code": "khb",
+      "entries": 395
+    },
+    {
+      "name": "Macedonian",
+      "code": "mk",
+      "entries": 41482
+    },
+    {
+      "name": "Magahi",
+      "code": "mag",
+      "entries": 693
+    },
+    {
+      "name": "Makasar",
+      "code": "mak",
+      "entries": 474
+    },
+    {
+      "name": "Malagasy",
+      "code": "mg",
+      "entries": 3619
+    },
+    {
+      "name": "Malay",
+      "code": "ms",
+      "entries": 5882
+    },
+    {
+      "name": "Malayalam",
+      "code": "ml",
+      "entries": 6532
+    },
+    {
+      "name": "Maltese",
+      "code": "mt",
+      "entries": 6803
+    },
+    {
+      "name": "Manchu",
+      "code": "mnc",
+      "entries": 2048
+    },
+    {
+      "name": "Mandarin",
+      "code": "cmn",
+      "entries": 59927
+    },
+    {
+      "name": "Manx",
+      "code": "gv",
+      "entries": 5766
+    },
+    {
+      "name": "Maori",
+      "code": "mi",
+      "entries": 1457
+    },
+    {
+      "name": "Mapudungun",
+      "code": "arn",
+      "entries": 862
+    },
+    {
+      "name": "Maquiritari",
+      "code": "mch",
+      "entries": 1091
+    },
+    {
+      "name": "Maranao",
+      "code": "mrw",
+      "entries": 804
+    },
+    {
+      "name": "Marathi",
+      "code": "mr",
+      "entries": 1995
+    },
+    {
+      "name": "Marshallese",
+      "code": "mh",
+      "entries": 1029
+    },
+    {
+      "name": "Mauritian Creole",
+      "code": "other",
+      "entries": 831
+    },
+    {
+      "name": "Middle Armenian",
+      "code": "axm",
+      "entries": 347
+    },
+    {
+      "name": "Middle Dutch",
+      "code": "other",
+      "entries": 1462
+    },
+    {
+      "name": "Middle English",
+      "code": "enm",
+      "entries": 9436
+    },
+    {
+      "name": "Middle French",
+      "code": "other",
+      "entries": 3250
+    },
+    {
+      "name": "Middle Irish",
+      "code": "other",
+      "entries": 467
+    },
+    {
+      "name": "Middle Korean",
+      "code": "other",
+      "entries": 561
+    },
+    {
+      "name": "Min Nan",
+      "code": "other",
+      "entries": 503
+    },
+    {
+      "name": "Mingrelian",
+      "code": "xmf",
+      "entries": 595
+    },
+    {
+      "name": "Mirandese",
+      "code": "mwl",
+      "entries": 398
+    },
+    {
+      "name": "Mohawk",
+      "code": "moh",
+      "entries": 539
+    },
+    {
+      "name": "Moksha",
+      "code": "mdf",
+      "entries": 351
+    },
+    {
+      "name": "Mon",
+      "code": "mnw",
+      "entries": 963
+    },
+    {
+      "name": "Mongolian",
+      "code": "mn",
+      "entries": 3490
+    },
+    {
+      "name": "Moroccan Arabic",
+      "code": "ary",
+      "entries": 1504
+    },
+    {
+      "name": "Nanai",
+      "code": "gld",
+      "entries": 535
+    },
+    {
+      "name": "Navajo",
+      "code": "nv",
+      "entries": 4296
+    },
+    {
+      "name": "Neapolitan",
+      "code": "nap",
+      "entries": 790
+    },
+    {
+      "name": "Nivkh",
+      "code": "other",
+      "entries": 401
+    },
+    {
+      "name": "Norman",
+      "code": "other",
+      "entries": 7420
+    },
+    {
+      "name": "North Frisian",
+      "code": "other",
+      "entries": 561
+    },
+    {
+      "name": "Northern Kurdish",
+      "code": "kmr",
+      "entries": 2591
+    },
+    {
+      "name": "Northern Ndebele",
+      "code": "other",
+      "entries": 387
+    },
+    {
+      "name": "Northern Sami",
+      "code": "se",
+      "entries": 3603
+    },
+    {
+      "name": "Norwegian Bokmål",
+      "code": "nb",
+      "entries": 20416
+    },
+    {
+      "name": "Norwegian Nynorsk",
+      "code": "nn",
+      "entries": 20155
+    },
+    {
+      "name": "Norwegian",
+      "code": "no",
+      "entries": 510
+    },
+    {
+      "name": "Occitan",
+      "code": "oc",
+      "entries": 4028
+    },
+    {
+      "name": "Ojibwe",
+      "code": "other",
+      "entries": 961
+    },
+    {
+      "name": "Okinawan",
+      "code": "other",
+      "entries": 690
+    },
+    {
+      "name": "Old Armenian",
+      "code": "other",
+      "entries": 4999
+    },
+    {
+      "name": "Old Church Slavonic",
+      "code": "other",
+      "entries": 3029
+    },
+    {
+      "name": "Old Dutch",
+      "code": "odt",
+      "entries": 800
+    },
+    {
+      "name": "Old East Slavic",
+      "code": "other",
+      "entries": 344
+    },
+    {
+      "name": "Old English",
+      "code": "ang",
+      "entries": 8471
+    },
+    {
+      "name": "Old French",
+      "code": "fro",
+      "entries": 5686
+    },
+    {
+      "name": "Old Frisian",
+      "code": "ofs",
+      "entries": 445
+    },
+    {
+      "name": "Old Georgian",
+      "code": "oge",
+      "entries": 524
+    },
+    {
+      "name": "Old High German",
+      "code": "other",
+      "entries": 1577
+    },
+    {
+      "name": "Old Irish",
+      "code": "sga",
+      "entries": 2351
+    },
+    {
+      "name": "Old Japanese",
+      "code": "ojp",
+      "entries": 291
+    },
+    {
+      "name": "Old Javanese",
+      "code": "other",
+      "entries": 579
+    },
+    {
+      "name": "Old Norse",
+      "code": "non",
+      "entries": 3750
+    },
+    {
+      "name": "Old Occitan",
+      "code": "other",
+      "entries": 522
+    },
+    {
+      "name": "Old Polish",
+      "code": "other",
+      "entries": 610
+    },
+    {
+      "name": "Old Portuguese",
+      "code": "other",
+      "entries": 494
+    },
+    {
+      "name": "Old Saxon",
+      "code": "osx",
+      "entries": 1498
+    },
+    {
+      "name": "Old Spanish",
+      "code": "osp",
+      "entries": 613
+    },
+    {
+      "name": "Old Swedish",
+      "code": "other",
+      "entries": 692
+    },
+    {
+      "name": "Oriya",
+      "code": "other",
+      "entries": 554
+    },
+    {
+      "name": "Oromo",
+      "code": "om",
+      "entries": 1028
+    },
+    {
+      "name": "Ossetian",
+      "code": "os",
+      "entries": 784
+    },
+    {
+      "name": "Ottoman Turkish",
+      "code": "other",
+      "entries": 3145
+    },
+    {
+      "name": "Pali",
+      "code": "pi",
+      "entries": 4686
+    },
+    {
+      "name": "Papiamentu",
+      "code": "other",
+      "entries": 751
+    },
+    {
+      "name": "Pashto",
+      "code": "ps",
+      "entries": 1264
+    },
+    {
+      "name": "Pennsylvania German",
+      "code": "pdc",
+      "entries": 1450
+    },
+    {
+      "name": "Persian",
+      "code": "fa",
+      "entries": 9941
+    },
+    {
+      "name": "Phalura",
+      "code": "phl",
+      "entries": 2542
+    },
+    {
+      "name": "Phuthi",
+      "code": "other",
+      "entries": 1206
+    },
+    {
+      "name": "Piedmontese",
+      "code": "other",
+      "entries": 679
+    },
+    {
+      "name": "Pite Sami",
+      "code": "sje",
+      "entries": 178
+    },
+    {
+      "name": "Plautdietsch",
+      "code": "pdt",
+      "entries": 2993
+    },
+    {
+      "name": "Polish",
+      "code": "pl",
+      "entries": 51066
+    },
+    {
+      "name": "Portuguese",
+      "code": "pt",
+      "entries": 52450
+    },
+    {
+      "name": "Prakrit",
+      "code": "other",
+      "entries": 911
+    },
+    {
+      "name": "Proto-Brythonic",
+      "code": "other",
+      "entries": 587
+    },
+    {
+      "name": "Proto-Celtic",
+      "code": "other",
+      "entries": 782
+    },
+    {
+      "name": "Proto-Finnic",
+      "code": "other",
+      "entries": 1620
+    },
+    {
+      "name": "Proto-Germanic",
+      "code": "other",
+      "entries": 4795
+    },
+    {
+      "name": "Proto-Indo-European",
+      "code": "other",
+      "entries": 615
+    },
+    {
+      "name": "Proto-Indo-Iranian",
+      "code": "other",
+      "entries": 578
+    },
+    {
+      "name": "Proto-Italic",
+      "code": "other",
+      "entries": 466
+    },
+    {
+      "name": "Proto-Malayo-Polynesian",
+      "code": "other",
+      "entries": 520
+    },
+    {
+      "name": "Proto-Samic",
+      "code": "other",
+      "entries": 1338
+    },
+    {
+      "name": "Proto-Slavic",
+      "code": "other",
+      "entries": 3301
+    },
+    {
+      "name": "Proto-Turkic",
+      "code": "other",
+      "entries": 334
+    },
+    {
+      "name": "Proto-West Germanic",
+      "code": "other",
+      "entries": 3551
+    },
+    {
+      "name": "Punjabi",
+      "code": "pa",
+      "entries": 1831
+    },
+    {
+      "name": "Quechua",
+      "code": "qu",
+      "entries": 1713
+    },
+    {
+      "name": "Romagnol",
+      "code": "rgn",
+      "entries": 868
+    },
+    {
+      "name": "Romani",
+      "code": "other",
+      "entries": 633
+    },
+    {
+      "name": "Romanian",
+      "code": "ro",
+      "entries": 65518
+    },
+    {
+      "name": "Romansch",
+      "code": "other",
+      "entries": 2152
+    },
+    {
+      "name": "Russian",
+      "code": "ru",
+      "entries": 46816
+    },
+    {
+      "name": "Rwanda-Rundi",
+      "code": "other",
+      "entries": 519
+    },
+    {
+      "name": "Sakizaya",
+      "code": "szy",
+      "entries": 586
+    },
+    {
+      "name": "Sambali",
+      "code": "other",
+      "entries": 508
+    },
+    {
+      "name": "Sanskrit",
+      "code": "sa",
+      "entries": 6284
+    },
+    {
+      "name": "Sardinian",
+      "code": "sc",
+      "entries": 959
+    },
+    {
+      "name": "Saterland Frisian",
+      "code": "other",
+      "entries": 1483
+    },
+    {
+      "name": "Scots",
+      "code": "sco",
+      "entries": 2795
+    },
+    {
+      "name": "Scottish Gaelic",
+      "code": "gd",
+      "entries": 8233
+    },
+    {
+      "name": "Serbo-Croatian",
+      "code": "sh",
+      "entries": 52110
+    },
+    {
+      "name": "Shan",
+      "code": "shn",
+      "entries": 2149
+    },
+    {
+      "name": "Sicilian",
+      "code": "scn",
+      "entries": 1726
+    },
+    {
+      "name": "Silesian",
+      "code": "szl",
+      "entries": 862
+    },
+    {
+      "name": "Skolt Sami",
+      "code": "sms",
+      "entries": 541
+    },
+    {
+      "name": "Slovak",
+      "code": "sk",
+      "entries": 5566
+    },
+    {
+      "name": "Slovene",
+      "code": "sl",
+      "entries": 4030
+    },
+    {
+      "name": "Somali",
+      "code": "so",
+      "entries": 842
+    },
+    {
+      "name": "Sotho",
+      "code": "other",
+      "entries": 635
+    },
+    {
+      "name": "South Levantine Arabic",
+      "code": "ajp",
+      "entries": 2620
+    },
+    {
+      "name": "Southern Altai",
+      "code": "alt",
+      "entries": 1040
+    },
+    {
+      "name": "Southern Ndebele",
+      "code": "other",
+      "entries": 533
+    },
+    {
+      "name": "Spanish",
+      "code": "es",
+      "entries": 98487
+    },
+    {
+      "name": "Sranan Tongo",
+      "code": "srn",
+      "entries": 820
+    },
+    {
+      "name": "Sumerian",
+      "code": "sux",
+      "entries": 1724
+    },
+    {
+      "name": "Sundanese",
+      "code": "su",
+      "entries": 1605
+    },
+    {
+      "name": "Swahili",
+      "code": "sw",
+      "entries": 6134
+    },
+    {
+      "name": "Swazi",
+      "code": "other",
+      "entries": 1465
+    },
+    {
+      "name": "Tagalog",
+      "code": "tl",
+      "entries": 14419
+    },
+    {
+      "name": "Tajik",
+      "code": "tg",
+      "entries": 1428
+    },
+    {
+      "name": "Tamil",
+      "code": "ta",
+      "entries": 5616
+    },
+    {
+      "name": "Tangut",
+      "code": "txg",
+      "entries": 285
+    },
+    {
+      "name": "Taos",
+      "code": "other",
+      "entries": 465
+    },
+    {
+      "name": "Tarantino",
+      "code": "other",
+      "entries": 498
+    },
+    {
+      "name": "Tatar",
+      "code": "tt",
+      "entries": 1231
+    },
+    {
+      "name": "Tausug",
+      "code": "tsg",
+      "entries": 597
+    },
+    {
+      "name": "Telugu",
+      "code": "te",
+      "entries": 13154
+    },
+    {
+      "name": "Ternate",
+      "code": "tft",
+      "entries": 1305
+    },
+    {
+      "name": "Tetelcingo Nahuatl",
+      "code": "nhg",
+      "entries": 439
+    },
+    {
+      "name": "Tetum",
+      "code": "tet",
+      "entries": 483
+    },
+    {
+      "name": "Thai",
+      "code": "th",
+      "entries": 14651
+    },
+    {
+      "name": "Tibetan",
+      "code": "bo",
+      "entries": 2796
+    },
+    {
+      "name": "Tigrinya",
+      "code": "ti",
+      "entries": 606
+    },
+    {
+      "name": "Tocharian A",
+      "code": "other",
+      "entries": 351
+    },
+    {
+      "name": "Tocharian B",
+      "code": "other",
+      "entries": 1920
+    },
+    {
+      "name": "Tok Pisin",
+      "code": "tpi",
+      "entries": 1555
+    },
+    {
+      "name": "Tokelauan",
+      "code": "other",
+      "entries": 410
+    },
+    {
+      "name": "Translingual",
+      "code": "other",
+      "entries": 40802
+    },
+    {
+      "name": "Turkish",
+      "code": "tr",
+      "entries": 14046
+    },
+    {
+      "name": "Turkmen",
+      "code": "tk",
+      "entries": 735
+    },
+    {
+      "name": "Tuvan",
+      "code": "other",
+      "entries": 704
+    },
+    {
+      "name": "Tày",
+      "code": "tyz",
+      "entries": 605
+    },
+    {
+      "name": "Ugaritic",
+      "code": "uga",
+      "entries": 752
+    },
+    {
+      "name": "Ukrainian",
+      "code": "uk",
+      "entries": 12856
+    },
+    {
+      "name": "Unami",
+      "code": "unm",
+      "entries": 646
+    },
+    {
+      "name": "Upper Sorbian",
+      "code": "hsb",
+      "entries": 620
+    },
+    {
+      "name": "Urak Lawoi'",
+      "code": "urk",
+      "entries": 591
+    },
+    {
+      "name": "Urdu",
+      "code": "ur",
+      "entries": 4421
+    },
+    {
+      "name": "Uyghur",
+      "code": "ug",
+      "entries": 1395
+    },
+    {
+      "name": "Uzbek",
+      "code": "uz",
+      "entries": 1600
+    },
+    {
+      "name": "Venetian",
+      "code": "vec",
+      "entries": 2459
+    },
+    {
+      "name": "Veps",
+      "code": "vep",
+      "entries": 1961
+    },
+    {
+      "name": "Vietnamese",
+      "code": "vi",
+      "entries": 24797
+    },
+    {
+      "name": "Vilamovian",
+      "code": "other",
+      "entries": 1173
+    },
+    {
+      "name": "Volapük",
+      "code": "vo",
+      "entries": 2536
+    },
+    {
+      "name": "Votic",
+      "code": "vot",
+      "entries": 474
+    },
+    {
+      "name": "Võro",
+      "code": "vro",
+      "entries": 487
+    },
+    {
+      "name": "Walloon",
+      "code": "wa",
+      "entries": 1039
+    },
+    {
+      "name": "Waray-Waray",
+      "code": "war",
+      "entries": 631
+    },
+    {
+      "name": "Welsh",
+      "code": "cy",
+      "entries": 7359
+    },
+    {
+      "name": "West Frisian",
+      "code": "other",
+      "entries": 1638
+    },
+    {
+      "name": "West Makian",
+      "code": "mqs",
+      "entries": 800
+    },
+    {
+      "name": "Westrobothnian",
+      "code": "other",
+      "entries": 2697
+    },
+    {
+      "name": "Wolof",
+      "code": "wo",
+      "entries": 614
+    },
+    {
+      "name": "Xhosa",
+      "code": "xh",
+      "entries": 2963
+    },
+    {
+      "name": "Yakut",
+      "code": "sah",
+      "entries": 2951
+    },
+    {
+      "name": "Yiddish",
+      "code": "yi",
+      "entries": 6004
+    },
+    {
+      "name": "Yogad",
+      "code": "yog",
+      "entries": 636
+    },
+    {
+      "name": "Yola",
+      "code": "yol",
+      "entries": 1635
+    },
+    {
+      "name": "Yoruba",
+      "code": "yo",
+      "entries": 3340
+    },
+    {
+      "name": "Yucatec Maya",
+      "code": "other",
+      "entries": 301
+    },
+    {
+      "name": "Zazaki",
+      "code": "other",
+      "entries": 727
+    },
+    {
+      "name": "Zhuang",
+      "code": "za",
+      "entries": 1286
+    },
+    {
+      "name": "Zulu",
+      "code": "zu",
+      "entries": 2710
+    }
+  ]
+}

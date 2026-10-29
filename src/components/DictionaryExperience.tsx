@@ -1,0 +1,164 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ArrowRight, BookOpen, ExternalLink, LoaderCircle, Search, X } from "lucide-react";
+import { useLexicon } from "@/context/LexiconContext";
+import { PronunciationControl } from "@/components/PronunciationControl";
+import { DefinitionTranslationControls, TranslatedDefinition, UnreviewedSourceDetails, useDefinitionTranslation, type DefinitionTranslationController } from "@/components/DefinitionTranslation";
+import { curatedSubject, dictionarySubject, wiktionarySourceUrl } from "@/lib/reviewed-definitions";
+import { getLanguageDisplayName } from "@/lib/languages";
+import { formatPartOfSpeech } from "@/lib/i18n";
+import { parseWiktionaryDefinitions, type DictionaryDefinitionGroup } from "@/lib/world-definitions";
+import type { LexiconEntry, PartOfSpeech, SearchResponse, UiLocale } from "@/types/lexicon";
+import type { WorldIndexSearchResult, WorldTranslationMatch } from "@/types/world";
+
+const COPY = {
+  "zh-Hans": {
+    eyebrow: "一本属于世界的词典", title: "一个词，", accent: "一个世界。", subtitle: "输入任何语言的词语，探索它的意思。", placeholder: "搜索词语、短语或拼写…", search: "查询", clear: "清除搜索", examples: "试试看", coverage: "词条来自开放的维基词典，收录范围因语言而异。", result: "查词结果", allLanguages: "全部语言", loading: "正在查找词条…", curated: "精选词典释义", live: "维基词典在线释义", snapshot: "备用词典释义", snapshotNote: "备用释义主要来自 2023 年维基词典快照，可能与现行词条不同。", translations: "多语言词汇对照", translationNote: "以下是维基词典翻译表中的对应词，并非完整释义。", english: "英语对应词", source: "查看来源", fullEntry: "查看完整词条", formOf: "匹配词形", lemma: "词头", noResults: "在可用数据中没有找到相关词条", noResultsHint: "请检查拼写或尝试其他形式；未返回结果不代表这个词不存在。", onlineUnavailable: "暂时无法连接在线维基词典，正在显示可用的备用数据。", indexUnavailable: "部分备用词库暂时不可用。", maybe: "你是否想找", more: "显示更多释义", less: "收起释义", moreWords: "显示更多词语", lessWords: "收起词语", limited: "部分结果未显示，请查看原始词条。", retry: "重试",
+  },
+  en: {
+    eyebrow: "A DICTIONARY FOR THE WORLD", title: "One word, ", accent: "a world of meaning.", subtitle: "Look up a word in any language and discover what it means.", placeholder: "Search for a word or phrase…", search: "Search", clear: "Clear search", examples: "Try a word", coverage: "Words come from open Wiktionary sources. Coverage varies by language.", result: "Dictionary results", allLanguages: "All languages", loading: "Looking up this word…", curated: "Curated dictionary entries", live: "Live Wiktionary definitions", snapshot: "Backup dictionary definitions", snapshotNote: "Backup definitions come mainly from a 2023 Wiktionary snapshot and may differ from current entries.", translations: "Words across languages", translationNote: "These are equivalents from Wiktionary translation tables, not full definitions.", english: "English equivalent", source: "View source", fullEntry: "View full entry", formOf: "Matched form", lemma: "headword", noResults: "No entry found in available sources", noResultsHint: "Check the spelling or try another form. A missing result does not prove the word does not exist.", onlineUnavailable: "Wiktionary is temporarily unavailable. Showing available backup data.", indexUnavailable: "Part of the local backup is temporarily unavailable.", maybe: "Did you mean", more: "Show more definitions", less: "Show fewer definitions", moreWords: "Show more words", lessWords: "Show fewer words", limited: "Some results are omitted; see the original entry for more.", retry: "Try again",
+  },
+  ms: {
+    eyebrow: "KAMUS UNTUK SELURUH DUNIA", title: "Satu kata, ", accent: "seribu makna.", subtitle: "Cari perkataan dalam apa-apa bahasa dan temui maknanya.", placeholder: "Cari perkataan atau frasa…", search: "Cari", clear: "Kosongkan carian", examples: "Cuba cari", coverage: "Kata diperoleh daripada Wiktionary terbuka. Liputan berbeza mengikut bahasa.", result: "Hasil carian kamus", allLanguages: "Semua bahasa", loading: "Sedang mencari kata…", curated: "Entri kamus pilihan", live: "Definisi Wiktionary dalam talian", snapshot: "Definisi kamus sandaran", snapshotNote: "Definisi sandaran kebanyakannya daripada syot kilat Wiktionary 2023 dan mungkin berbeza daripada entri semasa.", translations: "Kata merentas bahasa", translationNote: "Ini ialah padanan daripada jadual terjemahan Wiktionary, bukan definisi lengkap.", english: "Padanan bahasa Inggeris", source: "Lihat sumber", fullEntry: "Lihat entri penuh", formOf: "Bentuk sepadan", lemma: "kata kepala", noResults: "Tiada entri dalam sumber yang tersedia", noResultsHint: "Semak ejaan atau cuba bentuk lain. Ketiadaan hasil tidak membuktikan perkataan itu tidak wujud.", onlineUnavailable: "Wiktionary dalam talian tidak dapat dihubungi. Data sandaran yang tersedia dipaparkan.", indexUnavailable: "Sebahagian indeks sandaran tidak tersedia buat sementara waktu.", maybe: "Adakah maksud anda", more: "Lihat lebih banyak definisi", less: "Lihat kurang definisi", moreWords: "Lihat lebih banyak kata", lessWords: "Lihat kurang kata", limited: "Sebahagian hasil tidak dipaparkan; lihat entri asal.", retry: "Cuba lagi",
+  },
+} as const;
+type Copy = typeof COPY[UiLocale];
+type LoadStatus = "idle" | "loading" | "ready" | "unavailable";
+type State<T> = { status: LoadStatus; data?: T };
+type Live = { groups: DictionaryDefinitionGroup[]; suggestions: string[] };
+type Snapshot = { groups: DictionaryDefinitionGroup[]; suggestions: string[]; totalMatches: number; coverage: { languageCategories: number; entries: number; snapshotDate: string } };
+
+function keyOf(group: DictionaryDefinitionGroup): string { return group.languageCode === "other" ? `other:${group.languageName}` : group.languageCode; }
+function languageName(code: string, fallback: string, locale: UiLocale): string {
+  if (code === "other" || code.startsWith("other:")) return fallback;
+  try { const name = new Intl.DisplayNames([locale], { type: "language" }).of(code); return name && name !== code ? name : fallback; } catch { return fallback; }
+}
+function posName(label: string, locale: UiLocale): string {
+  const valid = ["noun", "verb", "adjective", "adverb", "preposition", "pronoun", "conjunction", "interjection", "classifier", "idiom", "proverb", "phrase"];
+  const normalized = label.toLowerCase(); return valid.includes(normalized) ? formatPartOfSpeech(normalized as PartOfSpeech, locale) : label;
+}
+async function fetchSuggestions(query: string, signal: AbortSignal): Promise<string[]> {
+  const params = new URLSearchParams({ action: "opensearch", format: "json", origin: "*", search: query, limit: "6", namespace: "0" });
+  const response = await fetch(`https://en.wiktionary.org/w/api.php?${params}`, { signal, credentials: "omit" });
+  if (!response.ok) return [];
+  const data: unknown = await response.json(); return Array.isArray(data) && Array.isArray(data[1]) ? data[1].filter((value: unknown): value is string => typeof value === "string").slice(0, 6) : [];
+}
+function LocalEntry({ entry, locale, copy, translator }: { entry: LexiconEntry; locale: UiLocale; copy: Copy; translator: DefinitionTranslationController }) {
+  const sense = entry.senses[0];
+  const translations = sense?.translations.filter((item) => item.language === locale).flatMap((item) => item.terms).slice(0, 3) ?? [];
+  return <article className="border-b border-[#e7ebe4] py-6 last:border-0 dark:border-ink-800">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#668378] dark:text-lexicon-400">{getLanguageDisplayName(entry.language, locale)}</span>{entry.partsOfSpeech.map((pos) => <span key={pos} className="text-xs italic text-[#8b978f] dark:text-ink-400">{formatPartOfSpeech(pos, locale)}</span>)}</div>
+    <Link href={`/word/${entry.language}/${encodeURIComponent(entry.headword)}`} dir={entry.language === "ar" ? "rtl" : undefined} className="mt-2 inline-block font-serif text-2xl font-bold text-[#233c33] hover:text-[#347462] dark:text-white dark:hover:text-lexicon-400">{entry.headword}</Link>{entry.ipa && <span className="ml-3 text-sm text-[#84928a]">{entry.ipa}</span>}
+    {sense && <><p className="mt-2 leading-7 text-[#52635a] dark:text-ink-300">{sense.definition}</p><TranslatedDefinition controller={translator} locale={locale} subject={curatedSubject(entry, sense)} /></>}
+    {translations.length > 0 && <UnreviewedSourceDetails key={translator.mode} locale={locale} kind="words"><p className="text-sm text-[#607c6e] dark:text-lexicon-400">{translations.join(" · ")}</p></UnreviewedSourceDetails>}
+    <Link href={`/word/${entry.language}/${encodeURIComponent(entry.headword)}`} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#36715f] hover:underline dark:text-lexicon-400">{copy.fullEntry}<ArrowRight className="h-3 w-3" /></Link>
+  </article>;
+}
+function DefinitionList({ groups, word, locale, copy, label, testId, note, expanded, setExpanded, translator, origin }: { groups: DictionaryDefinitionGroup[]; word: string; locale: UiLocale; copy: Copy; label: string; testId: string; note?: string; expanded: boolean; setExpanded: (value: boolean) => void; translator: DefinitionTranslationController; origin: "wiktionary-live" | "wiktionary-snapshot" }) {
+  const shown = expanded ? groups : groups.slice(0, 8);
+  return <section data-testid={testId} aria-label={label}><h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.17em] text-[#87948a] dark:text-ink-400">{label}</h3>{note && <p className="mt-2 text-xs leading-5 text-[#94a097] dark:text-ink-400">{note}</p>}
+    {shown.map((group, index) => {
+      const headword = group.headword ?? word;
+      return <article key={`${keyOf(group)}-${group.partOfSpeech}-${headword}-${index}`} className="border-b border-[#e7ebe4] py-6 last:border-0 dark:border-ink-800">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#668378] dark:text-lexicon-400">{languageName(group.languageCode, group.languageName, locale)}</span>{group.partOfSpeech && <span className="text-xs italic text-[#8b978f] dark:text-ink-400">{posName(group.partOfSpeech, locale)}</span>}</div>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2"><h4 dir="auto" className="font-serif text-2xl font-bold text-[#233c33] dark:text-white">{headword}</h4>{group.languageCode !== "other" && <PronunciationControl compact text={headword} locale={group.languageCode} />}</div>
+        {group.matchedForm && <p className="mt-1 text-xs text-[#87998c]">{copy.formOf}: <span dir="auto">{group.matchedForm}</span> · {copy.lemma}: {headword}</p>}
+        <ol className="mt-3 space-y-3 text-[15px] leading-7 text-[#52635a] dark:text-ink-300">{group.senses.map((sense, senseIndex) => <li key={`${senseIndex}-${sense.definition}`} className="flex gap-3"><span className="w-4 shrink-0 text-right font-mono text-xs text-[#a2aea5]">{senseIndex + 1}.</span><div className="min-w-0 flex-1"><span>{sense.definition}</span><TranslatedDefinition controller={translator} locale={locale} subject={dictionarySubject(group, word, sense.definition, origin)} />{sense.examples.length > 0 && <p className="mt-1 text-sm italic text-[#84938a] dark:text-ink-400">{sense.examples.join(" · ")}</p>}{sense.exampleTranslations?.some(Boolean) && <UnreviewedSourceDetails key={translator.mode} locale={locale} kind="examples">{sense.exampleTranslations.map((translation, exampleIndex) => translation && <p key={exampleIndex} dir="auto" className="text-xs text-[#607c6e] dark:text-ink-300">{translation}</p>)}</UnreviewedSourceDetails>}</div></li>)}</ol>
+        <a href={wiktionarySourceUrl(headword)} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#668679] hover:underline dark:text-lexicon-400">{copy.source}<ExternalLink className="h-3 w-3" /></a>
+      </article>;
+    })}
+    {groups.length > 8 && <button type="button" onClick={() => setExpanded(!expanded)} className="mt-4 text-sm font-semibold text-[#36715f] hover:underline dark:text-lexicon-400">{expanded ? copy.less : copy.more}</button>}
+  </section>;
+}
+function TranslationList({ matches, locale, copy }: { matches: WorldTranslationMatch[]; locale: UiLocale; copy: Copy }) {
+  const [expanded, setExpanded] = useState(false), grouped = new Map<string, { match: WorldTranslationMatch; words: WorldTranslationMatch[] }>();
+  for (const match of matches) { const key = `${match.language.code}\0${match.word}`, existing = grouped.get(key); if (existing) existing.words.push(match); else grouped.set(key, { match, words: [match] }); }
+  const groups = [...grouped.values()];
+  return <section data-testid="world-translation-index" aria-label={copy.translations}><h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.17em] text-[#87948a] dark:text-ink-400">{copy.translations}</h3><UnreviewedSourceDetails locale={locale} kind="words" testId="source-word-equivalents"><p className="mt-2 text-xs leading-5 text-[#94a097] dark:text-ink-400">{copy.translationNote}</p>{(expanded ? groups : groups.slice(0, 8)).map(({ match, words }) => <article key={`${match.language.code}-${match.word}`} className="border-b border-[#e7ebe4] py-5 last:border-0 dark:border-ink-800"><span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#668378] dark:text-lexicon-400">{languageName(match.language.code, match.language.name, locale)}</span><h4 dir={match.language.rtl ? "rtl" : "auto"} className="mt-2 w-fit font-serif text-2xl font-bold text-[#233c33] dark:text-white">{match.word}</h4>{match.romanization && <p className="mt-1 text-sm text-[#89978f]">{match.romanization}</p>}<p className="mt-2 text-sm text-[#52635a] dark:text-ink-300"><span className="text-[#98a59d]">{copy.english}: </span>{words.map((item, index) => <span key={`${item.english}-${index}`}>{index > 0 && " · "}<a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-[#36715f] hover:underline dark:text-lexicon-400">{item.english}</a></span>)}</p></article>)}{groups.length > 8 && <button type="button" onClick={() => setExpanded(!expanded)} className="mt-4 text-sm font-semibold text-[#36715f] hover:underline dark:text-lexicon-400">{expanded ? copy.lessWords : copy.moreWords}</button>}</UnreviewedSourceDetails></section>;
+}
+
+export function DictionaryExperience() {
+  const { uiLocale } = useLexicon(), copy = COPY[uiLocale], params = useSearchParams();
+  const query = (params.get("q") ?? "").trim().slice(0, 120);
+  const translator = useDefinitionTranslation(query, uiLocale);
+  const [expandedLive, setExpandedLive] = useState(false), [expandedBackup, setExpandedBackup] = useState(false);
+  const [draft, setDraft] = useState(query), [suggestions, setSuggestions] = useState<string[]>([]), [open, setOpen] = useState(false), [active, setActive] = useState(-1), [languageFilter, setLanguageFilter] = useState("all"), [retry, setRetry] = useState(0);
+  const [local, setLocal] = useState<State<SearchResponse>>({ status: "idle" }), [world, setWorld] = useState<State<WorldIndexSearchResult>>({ status: "idle" }), [snapshot, setSnapshot] = useState<State<Snapshot>>({ status: "idle" }), [live, setLive] = useState<State<Live>>({ status: "idle" });
+  const inputRef = useRef<HTMLInputElement>(null), boxRef = useRef<HTMLDivElement>(null), dirty = useRef(false), pending = useRef<string | null>(null);
+  useEffect(() => { if (pending.current !== null && pending.current !== query) return; pending.current = null; if (!dirty.current) setDraft(query); setLanguageFilter("all"); setExpandedLive(false); setExpandedBackup(false); }, [query]);
+  useEffect(() => { const pop = () => { pending.current = null; dirty.current = false; }; window.addEventListener("popstate", pop); return () => window.removeEventListener("popstate", pop); }, []);
+  useEffect(() => { const close = (event: MouseEvent) => { if (boxRef.current && !boxRef.current.contains(event.target as Node)) setOpen(false); }; document.addEventListener("mousedown", close); return () => document.removeEventListener("mousedown", close); }, []);
+
+  // Local and online suggestions resolve independently, so a blocked external
+  // request cannot prevent locally available suggestions from appearing.
+  useEffect(() => {
+    const value = draft.trim(); if (value.length < 2 || value === query) { setSuggestions([]); return; }
+    const controller = new AbortController(); let localValues: string[] = [], onlineValues: string[] = [];
+    const update = () => { if (!controller.signal.aborted) { setSuggestions([...new Set([...localValues, ...onlineValues])].filter((word) => word.toLowerCase() !== value.toLowerCase()).slice(0, 7)); setActive(-1); } };
+    const timer = setTimeout(() => {
+      fetch(`/api/world?q=${encodeURIComponent(value)}&limit=1`, { signal: controller.signal }).then((r) => r.ok ? r.json() as Promise<WorldIndexSearchResult> : null).then((data) => { localValues = data?.suggestions ?? []; update(); }).catch(() => {});
+      fetchSuggestions(value, controller.signal).then((data) => { onlineValues = data; update(); }).catch(() => {});
+    }, 400);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [draft, query]);
+
+  useEffect(() => {
+    if (!query) { setLocal({ status: "idle" }); setWorld({ status: "idle" }); setSnapshot({ status: "idle" }); setLive({ status: "idle" }); return; }
+    const controller = new AbortController(), liveController = new AbortController();
+    controller.signal.addEventListener("abort", () => liveController.abort()); const timeout = setTimeout(() => liveController.abort(), 8000);
+    setLocal({ status: "loading" }); setWorld({ status: "loading" }); setSnapshot({ status: "loading" }); setLive({ status: "loading" });
+    const get = <T,>(url: string, set: (value: State<T>) => void) => {
+      fetch(url, { signal: controller.signal }).then(async (response) => { if (!response.ok) throw new Error(); return response.json() as Promise<T>; }).then((data) => { if (!controller.signal.aborted) set({ status: "ready", data }); }).catch(() => { if (!controller.signal.aborted) set({ status: "unavailable" }); });
+    };
+    get<SearchResponse>(`/api/search?q=${encodeURIComponent(query)}&target=all&limit=20`, setLocal);
+    get<WorldIndexSearchResult>(`/api/world?q=${encodeURIComponent(query)}&limit=200`, setWorld);
+    get<Snapshot>(`/api/definitions?q=${encodeURIComponent(query)}&limit=80`, setSnapshot);
+    (async () => {
+      try {
+        const response = await fetch(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(query.replace(/\s+/g, "_"))}`, { signal: liveController.signal, credentials: "omit" });
+        if (response.status === 404) { let alternatives: string[] = []; try { alternatives = await fetchSuggestions(query, liveController.signal); } catch { /* Suggestions may be unavailable. */ } if (!controller.signal.aborted) setLive({ status: "ready", data: { groups: [], suggestions: alternatives } }); return; }
+        if (!response.ok) throw new Error(); const groups = parseWiktionaryDefinitions(await response.json());
+        if (!controller.signal.aborted) setLive({ status: "ready", data: { groups, suggestions: [] } });
+      } catch { if (!controller.signal.aborted) setLive({ status: "unavailable" }); } finally { clearTimeout(timeout); }
+    })();
+    return () => { controller.abort(); liveController.abort(); clearTimeout(timeout); };
+  }, [query, retry]);
+
+  const localEntries = local.data?.exactMatches.map((item) => item.entry) ?? [], liveGroups = live.data?.groups ?? [];
+  const represented = new Set([...liveGroups.map(keyOf), ...localEntries.map((entry) => entry.language)]);
+  const backupGroups = (snapshot.data?.groups ?? []).filter((group) => !represented.has(keyOf(group)));
+  const allRepresented = new Set([...represented, ...backupGroups.map(keyOf)]);
+  const translationMatches = (world.data?.matches ?? []).filter((match) => !allRepresented.has(match.language.code));
+  const options = (() => {
+    const names = new Map<string, string>();
+    for (const entry of localEntries) names.set(entry.language, getLanguageDisplayName(entry.language, uiLocale));
+    for (const group of [...liveGroups, ...backupGroups]) names.set(keyOf(group), languageName(group.languageCode, group.languageName, uiLocale));
+    for (const match of translationMatches) names.set(match.language.code, languageName(match.language.code, match.language.name, uiLocale));
+    return [...names].sort((a, b) => a[1].localeCompare(b[1], uiLocale));
+  })();
+  const chosenLocal = localEntries.filter((entry) => languageFilter === "all" || entry.language === languageFilter), chosenLive = liveGroups.filter((group) => languageFilter === "all" || keyOf(group) === languageFilter), chosenBackup = backupGroups.filter((group) => languageFilter === "all" || keyOf(group) === languageFilter), chosenTranslations = translationMatches.filter((match) => languageFilter === "all" || match.language.code === languageFilter);
+  const hasResults = chosenLocal.length + chosenLive.length + chosenBackup.length + chosenTranslations.length > 0, loading = [local, world, snapshot, live].some((state) => state.status === "loading");
+  const definitionsAvailable = chosenLocal.length + chosenLive.length + chosenBackup.length > 0;
+  const translationSubjects = [
+    ...chosenLocal.flatMap((entry) => entry.senses[0] ? [curatedSubject(entry, entry.senses[0])] : []),
+    ...(expandedLive ? chosenLive : chosenLive.slice(0, 8)).flatMap((group) => group.senses.map((sense) => dictionarySubject(group, query, sense.definition, "wiktionary-live"))),
+    ...(expandedBackup ? chosenBackup : chosenBackup.slice(0, 8)).flatMap((group) => group.senses.map((sense) => dictionarySubject(group, query, sense.definition, "wiktionary-snapshot"))),
+  ];
+  const alternatives = [...new Set([...(live.data?.suggestions ?? []), ...(snapshot.data?.suggestions ?? []), ...(world.data?.suggestions ?? []), ...(local.data?.suggestions.map((item) => item.word) ?? [])])].filter((word) => word.toLowerCase() !== query.toLowerCase()).slice(0, 8);
+  const searchFor = (value: string) => { const next = value.trim().slice(0, 120); dirty.current = false; setDraft(next); setOpen(false); setActive(-1); if (next !== query) { pending.current = next; window.history.pushState(null, "", next ? `/?q=${encodeURIComponent(next)}` : "/"); } else pending.current = null; };
+
+  return <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12">
+    <section className={`mx-auto max-w-3xl text-center ${query ? "pb-9 pt-12 sm:pt-16" : "pb-20 pt-20 sm:pb-28 sm:pt-28"}`}><div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.23em] text-[#789286] dark:text-lexicon-400"><span className="h-px w-5 bg-[#b4c5b8]" />{copy.eyebrow}<span className="h-px w-5 bg-[#b4c5b8]" /></div><h1 data-testid="hero-title" className="mt-6 font-serif text-[39px] font-semibold leading-[1.16] tracking-[-0.04em] text-[#203930] dark:text-white sm:text-[60px]">{copy.title}<span className="text-[#4b826e] dark:text-lexicon-400">{copy.accent}</span></h1><p className="mt-4 text-sm leading-7 text-[#7b8c80] dark:text-ink-400 sm:text-base">{copy.subtitle}</p>
+      <div ref={boxRef} className="relative mx-auto mt-9 max-w-2xl text-left"><form role="search" onSubmit={(event) => { event.preventDefault(); searchFor(active >= 0 && open ? (suggestions[active] ?? draft) : draft); }} className="flex min-h-[66px] items-center gap-2 rounded-2xl border border-[#dfe7de] bg-white p-2 pl-4 shadow-[0_12px_35px_rgba(34,68,52,0.08)] focus-within:border-[#81a99a] focus-within:ring-4 focus-within:ring-[#e7f0e9] dark:border-ink-700 dark:bg-ink-900 dark:focus-within:ring-ink-800 sm:gap-3 sm:pl-5"><Search aria-hidden="true" className="h-5 w-5 shrink-0 text-[#88a095]" /><label htmlFor="dictionary-search" className="sr-only">{copy.placeholder}</label><input ref={inputRef} id="dictionary-search" data-testid="search-input" role="combobox" aria-autocomplete="list" aria-expanded={open && suggestions.length > 0} aria-controls="dictionary-suggestions" aria-activedescendant={open && active >= 0 ? `suggestion-${active}` : undefined} autoComplete="off" value={draft} maxLength={120} onChange={(event) => { dirty.current = true; setDraft(event.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={(event) => { if (event.key === "ArrowDown" && suggestions.length) { event.preventDefault(); setOpen(true); setActive((active + 1) % suggestions.length); } if (event.key === "ArrowUp" && suggestions.length) { event.preventDefault(); setOpen(true); setActive((active - 1 + suggestions.length) % suggestions.length); } if (event.key === "Escape") { setOpen(false); setActive(-1); } }} placeholder={copy.placeholder} className="min-w-0 flex-1 bg-transparent py-3 text-[15px] text-[#2d4339] outline-none placeholder:text-[#a4b1a7] dark:text-white dark:placeholder:text-ink-500 sm:text-base" />{draft && <button type="button" data-testid="clear-search-button" aria-label={copy.clear} onClick={() => { setSuggestions([]); searchFor(""); inputRef.current?.focus(); }} className="rounded-lg p-2 text-[#9baaa0] hover:bg-[#f1f5f1] dark:hover:bg-ink-800"><X className="h-4 w-4" /></button>}<button type="submit" data-testid="dictionary-search-button" className="inline-flex h-[49px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#245e4e] px-4 text-sm font-semibold text-white hover:bg-[#194c3e] focus:outline-none focus:ring-2 focus:ring-[#77aa94] focus:ring-offset-2 dark:bg-lexicon-700 sm:px-6">{copy.search}<ArrowRight className="hidden h-4 w-4 sm:block" /></button></form>
+        {open && suggestions.length > 0 && <ul id="dictionary-suggestions" role="listbox" className="absolute left-0 right-0 top-[calc(100%+7px)] z-20 overflow-hidden rounded-xl border border-[#e2e9e1] bg-white py-1 shadow-xl dark:border-ink-700 dark:bg-ink-900">{suggestions.map((suggestion, i) => <li key={suggestion} id={`suggestion-${i}`} role="option" aria-selected={active === i}><button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => searchFor(suggestion)} className={`flex w-full items-center gap-3 px-5 py-2.5 text-left text-sm ${active === i ? "bg-[#eff5ef] dark:bg-ink-800" : "hover:bg-[#f5f8f4] dark:hover:bg-ink-800"}`}><Search className="h-3.5 w-3.5 text-[#9aada0]" /><span dir="auto">{suggestion}</span></button></li>)}</ul>}</div>
+      {!query && <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-xs text-[#9aa89e]"><span className="mr-1">{copy.examples}</span>{["makanan", "kucing", "serendipity", "学习"].map((word) => <button type="button" key={word} onClick={() => searchFor(word)} className="rounded-full border border-[#e3eae1] bg-[#f9fbf8] px-3 py-1.5 text-[#678174] hover:border-[#a8c3b1] dark:border-ink-700 dark:bg-ink-900 dark:text-ink-300">{word}</button>)}</div>}<p className="mt-6 text-xs leading-5 text-[#a0ada3] dark:text-ink-500">{copy.coverage}</p></section>
+    {query && <section className="mx-auto max-w-3xl border-t border-[#e7ebe4] pb-20 dark:border-ink-800" aria-live="polite"><div className="flex flex-wrap items-end justify-between gap-4 py-7"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#98a69c]">{copy.result}</p><h2 data-testid="result-query" dir="auto" className="mt-1 font-serif text-3xl font-semibold text-[#243e34] dark:text-white">{query}</h2></div>{options.length > 1 && <label className="text-xs text-[#839187]"><span className="sr-only">{copy.allLanguages}</span><select data-testid="result-language-filter" value={languageFilter} onChange={(event) => setLanguageFilter(event.target.value)} className="rounded-lg border border-[#e1e8df] bg-white px-3 py-2 text-xs font-medium text-[#597063] focus:outline-none focus:ring-2 focus:ring-lexicon-500 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200"><option value="all">{copy.allLanguages}</option>{options.map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label>}</div>
+      {live.status === "unavailable" && <p role="status" className="mb-6 rounded-lg border border-amber-100 bg-amber-50/70 px-4 py-3 text-xs leading-5 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">{copy.onlineUnavailable}</p>}{(world.status === "unavailable" || snapshot.status === "unavailable") && <p role="status" className="mb-6 text-xs text-amber-700 dark:text-amber-400">{copy.indexUnavailable}</p>}
+      {definitionsAvailable && <DefinitionTranslationControls controller={translator} locale={uiLocale} subjects={translationSubjects} />}
+      <div className="space-y-10">{chosenLocal.length > 0 && <section data-testid="curated-matches"><h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.17em] text-[#87948a] dark:text-ink-400">{copy.curated}</h3>{chosenLocal.map((entry) => <LocalEntry key={`${query}-${entry.id}`} entry={entry} locale={uiLocale} copy={copy} translator={translator} />)}</section>}{chosenLive.length > 0 && <DefinitionList key={`live-${query}`} groups={chosenLive} word={query} locale={uiLocale} copy={copy} label={copy.live} testId="world-definitions" origin="wiktionary-live" translator={translator} expanded={expandedLive} setExpanded={setExpandedLive} />}{chosenBackup.length > 0 && <DefinitionList key={`backup-${query}`} groups={chosenBackup} word={query} locale={uiLocale} copy={copy} label={copy.snapshot} testId="snapshot-definitions" note={copy.snapshotNote} origin="wiktionary-snapshot" translator={translator} expanded={expandedBackup} setExpanded={setExpandedBackup} />}{chosenTranslations.length > 0 && <TranslationList key={`translations-${query}-${translator.mode}`} matches={chosenTranslations} locale={uiLocale} copy={copy} />}</div>
+      {loading && <p data-testid="search-loading" className="mt-6 inline-flex items-center gap-2 text-sm text-[#87998c] dark:text-ink-400"><LoaderCircle className="h-4 w-4 animate-spin" />{copy.loading}</p>}{!loading && !hasResults && <div data-testid="empty-search-state" className="py-12 text-center"><BookOpen className="mx-auto h-7 w-7 text-[#b6c8b9]" /><h3 className="mt-4 font-serif text-xl font-semibold text-[#395446] dark:text-ink-100">{copy.noResults}</h3><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#89998e] dark:text-ink-400">{copy.noResultsHint}</p>{alternatives.length > 0 && <div className="mt-6"><p className="text-xs text-[#95a59a]">{copy.maybe}</p><div className="mt-2 flex flex-wrap justify-center gap-2">{alternatives.map((word) => <button key={word} type="button" onClick={() => searchFor(word)} className="rounded-full border border-[#dce7dc] bg-white px-3 py-1.5 text-sm text-[#437664] hover:border-[#92b4a1] dark:border-ink-700 dark:bg-ink-900 dark:text-lexicon-400">{word}</button>)}</div></div>}{live.status === "unavailable" && <button type="button" onClick={() => setRetry((value) => value + 1)} className="mt-5 text-sm font-semibold text-[#36715f] hover:underline dark:text-lexicon-400">{copy.retry}</button>}</div>}{((world.data && world.data.totalMatches > world.data.matches.length) || (snapshot.data && snapshot.data.totalMatches > 80)) && <p className="mt-6 text-xs text-[#99a79d]">{copy.limited}</p>}</section>}
+  </div>;
+}
