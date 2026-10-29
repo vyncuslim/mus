@@ -6,7 +6,7 @@ import nextPlugin from "@next/eslint-plugin-next";
 import globals from "globals";
 
 export default defineConfig([
-  globalIgnores([".next/**", "node_modules/**", "test-results/**", "next-env.d.ts"]),
+  globalIgnores([".next/**", ".vercel/**", "node_modules/**", "test-results/**", "next-env.d.ts"]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

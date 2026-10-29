@@ -3,7 +3,8 @@ import "./globals.css";
 import { LexiconProvider } from "@/context/LexiconContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vynalth-lexicon.vercel.app";
+import { resolveSiteUrl } from "@/lib/site-url";
+const SITE_URL = resolveSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "Vynalth Dictionary — A Dictionary for Every Language", template: "%s | Vynalth Dictionary" },

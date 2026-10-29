@@ -13,6 +13,9 @@ jobs:
   verify-and-build:
     name: Lint, Typecheck, Unit Tests, Importer & Production Build
     runs-on: ubuntu-24.04
+    env:
+      # Reserved test domain exercises Vercel's build/runtime URL handling.
+      VERCEL_PROJECT_PRODUCTION_URL: dictionary.example.test
 
     steps:
       - name: Checkout repository
@@ -39,8 +42,8 @@ jobs:
       - name: Verify Wiktextract streaming JSONL import pipeline
         run: npm run import:wiktextract -- --dry-run
 
-      - name: Run Next.js production build
-        run: npm run build
+      - name: Run Vercel-compatible production build and trace checks
+        run: npm run vercel-build
 
       - name: Run responsive browser and production offline tests
         run: |

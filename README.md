@@ -21,7 +21,7 @@ See [`data/wiktionary-definitions/README.md`](data/wiktionary-definitions/README
 
 ## Development
 
-Requires Node.js 22.13 or newer within the 22.x line, or Node.js 24 or newer.
+Requires Node.js 22.13 or newer within the 22.x line. The package's `engines` setting selects Node.js 22.x for Vercel builds and functions.
 
 ```bash
 npm ci
@@ -37,6 +37,17 @@ npm run test:e2e
 ```
 
 The app works without a database: the bundled dictionary indexes and curated starter entries are served locally. The browser requests live definitions and autocomplete directly from Wikimedia; these requests reveal the query to Wikimedia and may fail due to network or browser policy. Playback, where available, uses browser speech synthesis and is explicitly labeled as such, not as a native-speaker recording.
+
+## Deploy to Vercel from GitHub
+
+See the [Chinese deployment guide](docs/vercel-zh.md) for step-by-step setup and troubleshooting.
+
+1. In Vercel, choose **Add New → Project**, connect GitHub, and import this repository. Grant Vercel access to the repository in GitHub if prompted. Use the repository root (`.`), the Next.js framework, and the defaults from `vercel.json`; do not set a static `out` output directory.
+2. Deploy a branch **that contains this application**. If the changes are still in an open PR, the default `main` branch may not contain them yet: merge the PR after review or create a deployment from the PR branch in Vercel. Vercel's first deployment of a new project is production, even if it comes from another branch; later non-production branches normally create previews. The production branch is configurable under **Settings → Environments → Production → Branch Tracking**.
+3. No database or API key is required for the bundled dictionary. Vercel's automatically exposed `VERCEL_PROJECT_PRODUCTION_URL`, then `VERCEL_URL`, supplies the metadata origin; local development falls back to `http://localhost:3000`. If system environment variables are disabled, or to select a custom canonical domain, set `NEXT_PUBLIC_SITE_URL` to your real `https://` origin (no path) for the desired environments and redeploy. A malformed value fails the build. Keep `DATABASE_URL` optional and private; see **Optional PostgreSQL** below.
+4. After deployment, check `/`, `/api/health`, `/api/definitions?q=mengikut`, and `/api/world?q=water`. Check Vercel's **Deployments → Resources / Logs** for function sizes, errors, and plan limits. Deployment protection may require authentication before preview URLs can be tested.
+
+`npm run vercel-build` runs the production build and checks that all 256 key shards, every language shard, and the translation index are traced. It also applies a conservative 200 MiB budget to each large route and the union of API traces. This is a preflight, not a guarantee of final Vercel package size or hosted behavior: Vercel may group functions and add runtime files. The checked-in definition snapshot is about 88 MB compressed, so monitor function size, cold starts, memory and bandwidth in your own deployment. Serverless instances do not share the app's in-memory rate-limit counters; use a shared limiter if global abuse protection is required.
 
 ### Translating English definitions
 
@@ -86,4 +97,4 @@ The importer is limited to the 12 structured-entry language codes and supported 
 - `GET /api/search?q=<word>&source=<structured-code|all>&target=<structured-code|all>&limit=<1..100>` — curated or PostgreSQL entries, with optional POS/Malay filters.
 - `GET /api/words/[language]/[word]`, `/api/suggestions`, `/api/languages`, `/api/health` — structured entry details and status. The legacy structured language registry lists 12 codes; global snapshot and translation coverage is reported separately. For `/api/languages`, use `headwordCount`, `hasEntries` and `summary.totalEntries`; for `/api/health`, use `lexicon.totalEntries`. The old `verifiedHeadwordCount`, `hasVerifiedEntries` and `totalVerifiedEntries` fields now return `null`: entry-level verification has not been measured, and the old counts did not establish it. Both endpoints separately report the number of documented definition-translation records.
 
-A host must deploy the checked-in `data/` artifacts and support Node filesystem access; `next.config.ts` includes the compressed shards in output tracing. Set `NEXT_PUBLIC_SITE_URL` for canonical links. On serverless platforms, check function size and memory limits before deployment.
+A host must deploy the checked-in `data/` artifacts and support Node filesystem access; `next.config.ts` includes the compressed shards in output tracing. Set `NEXT_PUBLIC_SITE_URL` if your platform does not supply a Vercel deployment URL. On serverless platforms, check function size and memory limits before deployment.

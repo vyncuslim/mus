@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
+import { resolveSiteUrl } from "@/lib/site-url";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://vynalth-lexicon.vercel.app";
+const SITE_URL = resolveSiteUrl();
 
 export default function robots(): MetadataRoute.Robots {
   return {

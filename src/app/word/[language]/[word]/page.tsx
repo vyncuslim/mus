@@ -6,9 +6,9 @@ import { getLanguageMetadata, isValidLanguageCode } from "@/lib/languages";
 import { analyzeMalayMorphology } from "@/lib/malay-morphology";
 import { WordDetailClient } from "@/components/WordDetailClient";
 import { ArrowLeft, GitBranch, SearchX } from "lucide-react";
+import { resolveSiteUrl } from "@/lib/site-url";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://vynalth-lexicon.vercel.app";
+const SITE_URL = resolveSiteUrl();
 
 // Next page route params can still be percent-encoded in production. Decode
 // once here, while keeping literal percent signs and malformed input safe.

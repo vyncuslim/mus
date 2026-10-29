@@ -3,6 +3,9 @@ node_modules/
 /.pnp
 .pnp.js
 
+# Vercel project links and build output may contain project settings or secrets
+/.vercel/
+
 # Next.js build output
 /.next/
 /out/
