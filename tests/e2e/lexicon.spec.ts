@@ -16,6 +16,12 @@ test.describe("Focused multilingual dictionary", () => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
+    const brand = page.getByRole("link", { name: "Vynalth Dictionary" });
+    await expect(brand).toHaveAttribute("href", "/");
+    const logo = page.getByTestId("brand-logo");
+    await expect(logo).toBeVisible();
+    await expect(logo).toHaveAttribute("src", "/icon.svg");
+    await expect.poll(() => logo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
     await expect(page.getByTestId("hero-title")).toContainText("一个词");
     await expect(page.getByTestId("search-input")).toBeVisible();
     await expect(page.getByRole("link", { name: /favorites|收藏|learning|学习中心/i })).toHaveCount(0);
@@ -26,6 +32,7 @@ test.describe("Focused multilingual dictionary", () => {
     await page.getByTestId("ui-locale-selector").selectOption("zh-Hans");
     await page.getByTestId("theme-toggle").click();
     await expect(page.locator("html")).toHaveClass(/dark/);
+    await expect(logo).toBeVisible();
     await page.getByTestId("theme-toggle").click();
     await expect(page.locator("html")).not.toHaveClass(/dark/);
     const sizes = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth }));
@@ -148,6 +155,11 @@ test.describe("Focused multilingual dictionary", () => {
     await context.setOffline(true);
     await page.reload();
     await expect(page.getByTestId("offline-banner")).toBeVisible();
+    await expect(page.getByTestId("brand-logo")).toBeVisible();
+    const cachedIcons = await page.evaluate(async () => Promise.all(
+      ["/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"].map(async (path) => (await fetch(path)).ok)
+    ));
+    expect(cachedIcons).toEqual([true, true, true, true]);
     await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });
     await context.setOffline(false);
   });

@@ -5,7 +5,19 @@ test("deployment metadata uses the configured origin and dictionary APIs are ava
   const origin = resolveSiteUrl();
   const home = await request.get("/");
   expect(home.status()).toBe(200);
-  expect(await home.text()).toContain(`<link rel="canonical" href="${origin}"`);
+  const html = await home.text();
+  expect(html).toContain(`<link rel="canonical" href="${origin}"`);
+  expect(html).toContain('rel="apple-touch-icon" href="/apple-touch-icon.png"');
+
+  const manifest = await request.get("/manifest.webmanifest");
+  expect(manifest.status()).toBe(200);
+  expect((await manifest.json()).icons).toEqual(expect.arrayContaining([
+    expect.objectContaining({ src: "/icon-192.png", sizes: "192x192" }),
+    expect.objectContaining({ src: "/icon-512.png", sizes: "512x512" }),
+  ]));
+  for (const path of ["/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"]) {
+    expect((await request.get(path)).status()).toBe(200);
+  }
 
   const robots = await request.get("/robots.txt");
   expect(robots.status()).toBe(200);
