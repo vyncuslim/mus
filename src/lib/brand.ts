@@ -1,6 +1,8 @@
 /** Public, versioned URLs for the approved Vynalth mark and its derivatives. */
 export const BRAND_NAME = "Vynalth Dictionary";
-const root = "/brand/v2";
+// These assets are intentionally public to share platforms, even when the
+// site's other images are protected by Cloudflare Hotlink Protection.
+const root = "/brand/v2/hotlink-ok";
 export const BRAND_ASSETS = {
   mark: `${root}/icon.svg`,
   favicon: `${root}/favicon.ico`,
