@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "Vynalth Dictionary — A Dictionary for Every Language", template: "%s | Vynalth Dictionary" },
   description: "Search words across languages using open Wiktionary sources. Coverage varies by language.",
-  applicationName: "Vynalth Dictionary", alternates: { canonical: "/" }, manifest: "/manifest.webmanifest", icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  applicationName: "Vynalth Dictionary", alternates: { canonical: "/" }, manifest: "/manifest.webmanifest", icons: { icon: "/icon.svg", apple: "/apple-touch-icon.png" },
   openGraph: { type: "website", siteName: "Vynalth Dictionary", title: "Vynalth Dictionary", description: "A focused dictionary for words across languages.", url: SITE_URL },
 };
 export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: light)", color: "#245e4e" }, { media: "(prefers-color-scheme: dark)", color: "#020617" }], width: "device-width", initialScale: 1 };

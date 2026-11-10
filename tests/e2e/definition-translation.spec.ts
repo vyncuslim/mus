@@ -42,6 +42,8 @@ test.describe("Multilingual definition translations", () => {
     await select.selectOption("es-ES");
     await page.getByTestId("translate-definitions-button").click();
     await expect(definitions.getByTestId("translated-definition").first()).toContainText("Esta es una traducción al español.");
+    // The first translated sense can appear before the rest of its batch has finished.
+    await expect(page.getByTestId("translate-definitions-button")).toBeVisible();
     const cachedCalls = calls;
     await select.selectOption("zh-CN");
     await expect(definitions.getByTestId("translated-definition").first()).toContainText("这是自动翻译的中文释义。");
