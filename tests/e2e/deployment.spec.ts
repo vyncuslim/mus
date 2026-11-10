@@ -29,8 +29,9 @@ test("deployment metadata uses the configured origin and dictionary APIs are ava
     expect.objectContaining({ src: BRAND_ASSETS.icon512, sizes: "512x512", purpose: "any" }),
     expect.objectContaining({ src: BRAND_ASSETS.maskable, sizes: "512x512", purpose: "maskable" }),
   ]));
-  for (const path of [...Object.values(BRAND_ASSETS), "/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.ico"]) {
-    expect((await request.get(path)).status(), `asset ${path}`).toBe(200);
+  const currentAssets = Object.values(BRAND_ASSETS);
+  for (const path of [...currentAssets, ...currentAssets.map((url) => url.replace("/hotlink-ok/", "/")), "/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.ico"]) {
+    expect((await request.get(path, { headers: { referer: "https://sharing.example/" } })).status(), `asset ${path}`).toBe(200);
   }
 
   const robots = await request.get("/robots.txt");

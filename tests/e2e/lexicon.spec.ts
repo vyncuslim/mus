@@ -161,22 +161,26 @@ test.describe("Focused multilingual dictionary", () => {
     // before the new app has a chance to register its worker.
     await page.goto("/api/health");
     await page.evaluate(async () => {
-      const cache = await caches.open("vynalth-dictionary-v4");
-      await cache.put("/api/definitions?q=legacy-cache-probe", new Response('{"source":"previous-cache"}', { headers: { "Content-Type": "application/json" } }));
-      await cache.put("/icon.svg", new Response("stale-logo"));
+      for (const version of ["v4", "v5"]) {
+        const cache = await caches.open(`vynalth-dictionary-${version}`);
+        await cache.put(`/api/definitions?q=legacy-cache-probe-${version}`, new Response(JSON.stringify({ source: version }), { headers: { "Content-Type": "application/json" } }));
+        await cache.put("/icon.svg", new Response("stale-logo"));
+      }
     });
     await blockWikimedia(page);
     await page.goto("/");
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-    await expect.poll(() => page.evaluate(async () => (await caches.keys()).includes("vynalth-dictionary-v4"))).toBe(false);
+    await expect.poll(() => page.evaluate(async () => (await caches.keys()).some((name) => ["vynalth-dictionary-v4", "vynalth-dictionary-v5"].includes(name)))).toBe(false);
     await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
     await context.setOffline(true);
     const offline = await page.evaluate(async (markUrl) => ({
-      lookup: await (await fetch("/api/definitions?q=legacy-cache-probe")).json(),
+      lookupV4: await (await fetch("/api/definitions?q=legacy-cache-probe-v4")).json(),
+      lookupV5: await (await fetch("/api/definitions?q=legacy-cache-probe-v5")).json(),
       icon: await (await fetch("/icon.svg")).text(),
       mark: await (await fetch(markUrl)).text(),
     }), BRAND_ASSETS.mark);
-    expect(offline.lookup).toEqual({ source: "previous-cache" });
+    expect(offline.lookupV4).toEqual({ source: "v4" });
+    expect(offline.lookupV5).toEqual({ source: "v5" });
     expect(offline.icon).not.toContain("stale-logo");
     expect(offline.icon).toEqual(offline.mark);
     await context.setOffline(false);
@@ -195,7 +199,8 @@ test.describe("Focused multilingual dictionary", () => {
     await page.reload();
     await expect(page.getByTestId("offline-banner")).toBeVisible();
     await expectPageBrand(page);
-    const iconPaths = [...Object.values(BRAND_ASSETS), "/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.ico"];
+    const currentPaths = Object.values(BRAND_ASSETS);
+    const iconPaths = [...currentPaths, ...currentPaths.map((path) => path.replace("/hotlink-ok/", "/")), "/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.ico"];
     const cachedIcons = await page.evaluate(async (paths) => Promise.all(paths.map(async (path) => (await fetch(path)).ok)), iconPaths);
     expect(cachedIcons).toEqual(iconPaths.map(() => true));
     await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });

@@ -19,6 +19,11 @@ describe("approved brand assets", () => {
     for (const [legacy, versioned] of pairs) {
       expect(await readFile(asset(legacy))).toEqual(await readFile(asset(versioned)));
     }
+    for (const versioned of Object.values(BRAND_ASSETS)) {
+      expect(versioned).toContain("/hotlink-ok/");
+      const previous = versioned.replace("/hotlink-ok/", "/");
+      expect(await readFile(asset(previous))).toEqual(await readFile(asset(versioned)));
+    }
     const master = (await readFile(asset(BRAND_ASSETS.mark))).toString();
     const pinned = (await readFile(asset(BRAND_ASSETS.safariPinned))).toString();
     const paths = [...master.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map((match) => match[1]);

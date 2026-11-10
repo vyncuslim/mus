@@ -1,5 +1,5 @@
 /* Cache the app shell and a small number of visited queries, not the full dictionary. */
-const CACHE_NAME = "vynalth-dictionary-v5";
+const CACHE_NAME = "vynalth-dictionary-v6";
 const MAX_RUNTIME_ENTRIES = 100;
 const APP_ASSETS = [
   // Legacy URLs remain usable by existing installations.
@@ -7,6 +7,10 @@ const APP_ASSETS = [
   "/brand/v2/icon.svg", "/brand/v2/favicon.ico", "/brand/v2/favicon-32.png",
   "/brand/v2/apple-touch-icon.png", "/brand/v2/icon-192.png", "/brand/v2/icon-512.png",
   "/brand/v2/icon-maskable-512.png", "/brand/v2/safari-pinned-tab.svg", "/brand/v2/social-card.png",
+  // These public brand images may be loaded by external sharing platforms.
+  "/brand/v2/hotlink-ok/icon.svg", "/brand/v2/hotlink-ok/favicon.ico", "/brand/v2/hotlink-ok/favicon-32.png",
+  "/brand/v2/hotlink-ok/apple-touch-icon.png", "/brand/v2/hotlink-ok/icon-192.png", "/brand/v2/hotlink-ok/icon-512.png",
+  "/brand/v2/hotlink-ok/icon-maskable-512.png", "/brand/v2/hotlink-ok/safari-pinned-tab.svg", "/brand/v2/hotlink-ok/social-card.png",
   "/manifest.webmanifest",
 ];
 const APP_SHELL = ["/", "/sources", ...APP_ASSETS];
