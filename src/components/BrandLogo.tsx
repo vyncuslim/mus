@@ -25,7 +25,7 @@ export function BrandLogo({ placement = "header" }: { placement?: Placement }) {
       />
       <span className="flex flex-col leading-none">
         <span className={`font-serif font-semibold tracking-[-0.035em] text-[#1a302b] dark:text-white ${compact ? "text-[15px]" : "text-[20px]"}`}>Vynalth</span>
-        <span className={`font-semibold uppercase tracking-[0.22em] text-[#71827b] dark:text-ink-400 ${compact ? "mt-0.5 text-[7px]" : "mt-1 text-[9px]"}`}>Dictionary</span>
+        <span className={`font-semibold uppercase tracking-[0.22em] text-[#5d7568] dark:text-ink-400 ${compact ? "mt-0.5 text-[9px]" : "mt-1 text-[10px]"}`}>{" Dictionary"}</span>
       </span>
     </Link>
   );

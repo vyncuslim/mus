@@ -7,6 +7,8 @@ import { STARTER_LEXICON_ENTRIES, getDatasetCoverageSummary, type DatasetCoverag
 import type { LanguageCode, LexiconEntry, SearchResponse, SearchSuggestion } from "@/types/lexicon";
 import { computeSuggestions, executeLexiconSearch, type SearchOptions } from "./search-engine";
 import { normalizeCompactKey, normalizeSearchKey, normalizeUnicode } from "./text-normalize";
+import { SUPPORTED_LANGUAGE_CODES } from "./languages";
+import { ENTRY_INDEX_LIMIT, toIndexableEntry, type EntryIndexItem } from "./entry-index";
 
 type Database = PostgresJsDatabase<typeof schema>;
 // Do not SELECT the new optional reading columns from old, unmigrated databases.
@@ -58,7 +60,15 @@ export async function searchDictionary(options: Omit<SearchOptions, "entries" | 
 
 function chooseEntry(entries: readonly LexiconEntry[], language: LanguageCode, word: string): LexiconEntry | null {
   const normalized = normalizeSearchKey(word), lower = word.toLowerCase();
-  return entries.find((e) => e.language === language && (e.headword === word || e.slug === word || e.headword.toLowerCase() === lower || e.slug.toLowerCase() === lower)) ?? entries.find((e) => e.language === language && (e.normalizedHeadword === normalized || normalizeSearchKey(e.slug) === normalized)) ?? null;
+  const sameLanguage = entries.filter((entry) => entry.language === language);
+  // A different record's slug must not shadow a real, exact headword URL.
+  return sameLanguage.find((entry) => entry.headword === word)
+    ?? sameLanguage.find((entry) => entry.slug === word)
+    ?? sameLanguage.find((entry) => entry.headword.toLowerCase() === lower)
+    ?? sameLanguage.find((entry) => entry.slug.toLowerCase() === lower)
+    ?? sameLanguage.find((entry) => entry.normalizedHeadword === normalized)
+    ?? sameLanguage.find((entry) => normalizeSearchKey(entry.slug) === normalized)
+    ?? null;
 }
 function starterWord(language: LanguageCode, word: string) {
   const entry = chooseEntry(STARTER_LEXICON_ENTRIES, language, word), root = entry?.malayMorphology?.kataDasar;
@@ -67,7 +77,7 @@ function starterWord(language: LanguageCode, word: string) {
 }
 export async function databaseWord(db: Database, language: LanguageCode, word: string): Promise<{ entry: LexiconEntry | null; morphologyFamily: LexiconEntry[] }> {
   const norm = normalizeSearchKey(word);
-  const rows = await db.select(entryColumns).from(entriesTable).where(and(eq(entriesTable.language, language), or(eq(entriesTable.normalizedHeadword, norm), eq(entriesTable.headword, word), eq(entriesTable.slug, word)))).orderBy(asc(entriesTable.id)).limit(100);
+  const rows = await db.select(entryColumns).from(entriesTable).where(and(eq(entriesTable.language, language), or(eq(entriesTable.normalizedHeadword, norm), eq(entriesTable.headword, word), eq(entriesTable.slug, word)))).orderBy(sql`case when ${entriesTable.headword} = ${word} then 0 when ${entriesTable.slug} = ${word} then 1 else 2 end`, asc(entriesTable.id)).limit(100);
   const entry = chooseEntry(rows.map(asEntry), language, word);
   let morphologyFamily: LexiconEntry[] = [];
   if (entry?.language === "ms" && entry.malayMorphology?.kataDasar) {
@@ -92,6 +102,48 @@ export async function getFeaturedEntries(limit = 8): Promise<LexiconEntry[]> {
   }
   return STARTER_LEXICON_ENTRIES.filter((e) => e.featured).sort((a, b) => (a.frequencyRank ?? 99) - (b.frequencyRank ?? 99)).slice(0, limit);
 }
+/** A bounded selection of real structured detail pages, not the larger search snapshots. */
+export async function databaseIndexEntries(db: Database): Promise<EntryIndexItem[]> {
+  // Detail lookups select these core columns. Verify them without reading rows,
+  // so an incompatible DB falls back instead of advertising broken detail URLs.
+  // The two newer, optional reading columns are deliberately excluded.
+  await db.select(entryColumns).from(entriesTable).limit(0);
+  // Filtering in SQL prevents empty records from crowding out useful entries.
+  const definition = sql<string | null>`${entriesTable.senses}->0->>'definition'`;
+  const rows = await db.select({ language: entriesTable.language, headword: entriesTable.headword, definition })
+    .from(entriesTable)
+    .where(and(inArray(entriesTable.language, [...SUPPORTED_LANGUAGE_CODES]), sql`length(btrim(coalesce(${definition}, ''))) > 0`))
+    .orderBy(asc(entriesTable.language), asc(entriesTable.headword), asc(entriesTable.id))
+    .limit(ENTRY_INDEX_LIMIT + 1);
+  const unique = new Set<string>();
+  return rows.flatMap((row) => {
+    const entry = toIndexableEntry(row);
+    const key = entry && `${entry.language}\0${entry.headword}`;
+    if (!entry || !key || unique.has(key)) return [];
+    unique.add(key);
+    return [entry];
+  }).slice(0, ENTRY_INDEX_LIMIT);
+}
+
+export async function getIndexableEntries(): Promise<{ entries: EntryIndexItem[]; dataSourceMode: "postgresql" | "starter_dataset" }> {
+  const db = getDb();
+  if (db) {
+    try {
+      const entries = await databaseIndexEntries(db);
+      // A nonempty DB is authoritative even when none of its records can be
+      // advertised; otherwise sitemap links could point to missing fallback words.
+      if (entries.length || await hasRows(db)) return { entries, dataSourceMode: "postgresql" };
+    } catch { /* Unreachable or incompatible DB: match detail-page fallback. */ }
+  }
+  return {
+    entries: STARTER_LEXICON_ENTRIES.flatMap((entry) => {
+      const indexable = toIndexableEntry({ language: entry.language, headword: entry.headword, definition: entry.senses[0]?.definition });
+      return indexable ? [indexable] : [];
+    }).slice(0, ENTRY_INDEX_LIMIT),
+    dataSourceMode: "starter_dataset",
+  };
+}
+
 export async function getAutocompleteSuggestions(query: string, language: LanguageCode | "all" = "all", limit = 6): Promise<SearchSuggestion[]> {
   const db = getDb();
   if (db) {

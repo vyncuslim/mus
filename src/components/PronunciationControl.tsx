@@ -168,7 +168,7 @@ export function PronunciationControl({
               ? t.wordDetail.stopAudio
               : `${t.wordDetail.listenBrowserTts}: ${text}`
           }
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg bg-lexicon-600 hover:bg-lexicon-700 text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-lexicon-500 focus:ring-offset-1"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg bg-lexicon-700 hover:bg-lexicon-800 text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-lexicon-500 focus:ring-offset-1"
         >
           {isPlaying ? (
             <>
