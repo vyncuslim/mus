@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Vynalth Dictionary</title>
+  <rect x="1" y="1" width="126" height="126" rx="20" fill="#f4f1e7" stroke="#bccbbd" stroke-width="2"/>
+  <!-- The open-book outline and V are drawn as simple, single-colour letterforms. -->
+  <path d="M22 30c14-2 28 2 42 13 14-11 28-15 42-13v47c-14-2-28 2-42 13-14-11-28-15-42-13z" fill="none" stroke="#214b40" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M37 43l27 36 27-36" fill="none" stroke="#214b40" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M31 103h66" fill="none" stroke="#8ba596" stroke-width="2" stroke-linecap="round"/>
+</svg>

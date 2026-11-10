@@ -128,7 +128,7 @@ export interface UiDictionary {
 export const UI_TRANSLATIONS: Record<UiLocale, UiDictionary> = {
   en: {
     brand: {
-      name: "Vynalth Lexicon",
+      name: "Vynalth Dictionary",
       tagline: "Precision Multilingual Dictionary & Malay Morphological Reference",
       subtitle:
         "Sense-aligned translations, verified Wiktionary/Wiktextract lexical records, IPA phonetics, and deep Bahasa Melayu root-word analysis.",
@@ -163,7 +163,7 @@ export const UI_TRANSLATIONS: Record<UiLocale, UiDictionary> = {
       didYouMean: "Typo-tolerant suggestions",
       noResultsTitle: "No verified dictionary entry found",
       noResultsDescription:
-        "Vynalth Lexicon never fabricates entries. Try selecting 'All Languages', checking your spelling, or searching by root word (kata dasar).",
+        "No matching entry was found. Try selecting 'All Languages', checking your spelling, or searching by root word (kata dasar).",
       latencyLabel: "Query time",
       resultsFound: "verified entries matched",
       starterDatasetBadge: "Verified Starter Lexicon (Read-Only Mode)",
@@ -258,7 +258,7 @@ export const UI_TRANSLATIONS: Record<UiLocale, UiDictionary> = {
   },
   ms: {
     brand: {
-      name: "Vynalth Lexicon",
+      name: "Vynalth Dictionary",
       tagline: "Kamus Pelbagai Bahasa & Rujukan Morfologi Bahasa Melayu",
       subtitle:
         "Terjemahan mengikut deria makna, rekod leksikal Wiktionary/Wiktextract yang disahkan, fonetik IPA, serta analisis mendalam Kata Dasar Bahasa Melayu.",
@@ -293,7 +293,7 @@ export const UI_TRANSLATIONS: Record<UiLocale, UiDictionary> = {
       didYouMean: "Cadangan ejaan terdekat",
       noResultsTitle: "Tiada entri kamus yang disahkan ditemui",
       noResultsDescription:
-        "Vynalth Lexicon tidak mereka-reka entri palsu. Cuba pilih 'Semua Bahasa', semak ejaan, atau cari mengikut kata dasar.",
+        "Entri yang sepadan tidak ditemui. Cuba pilih 'Semua Bahasa', semak ejaan, atau cari mengikut kata dasar.",
       latencyLabel: "Masa carian",
       resultsFound: "entri disahkan ditemui",
       starterDatasetBadge: "Set Data Permulaan Disahkan (Mod Baca Sahaja)",
@@ -388,7 +388,7 @@ export const UI_TRANSLATIONS: Record<UiLocale, UiDictionary> = {
   },
   "zh-Hans": {
     brand: {
-      name: "Vynalth Lexicon",
+      name: "Vynalth Dictionary",
       tagline: "高精多语种词典与马来语词法分析平台",
       subtitle:
         "按义项精准对译、经验证的 Wiktionary/Wiktextract 词条数据、国际音标 (IPA) 及深度马来语词根 (Kata Dasar) 解析。",
@@ -423,7 +423,7 @@ export const UI_TRANSLATIONS: Record<UiLocale, UiDictionary> = {
       didYouMean: "拼写容错建议",
       noResultsTitle: "未找到已验证的词典词条",
       noResultsDescription:
-        "Vynalth Lexicon 绝不伪造词条。请尝试切换为“所有语言”、检查拼写，或按马来语词根 (Kata Dasar) 搜索。",
+        "没有找到匹配的词条。请尝试切换为“所有语言”、检查拼写，或按马来语词根 (Kata Dasar) 搜索。",
       latencyLabel: "检索耗时",
       resultsFound: "条已验证词条",
       starterDatasetBadge: "已验证初始词库 (只读模式)",

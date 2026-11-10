@@ -38,6 +38,12 @@ npm run test:e2e
 
 The app works without a database: the bundled dictionary indexes and curated starter entries are served locally. The browser requests live definitions and autocomplete directly from Wikimedia; these requests reveal the query to Wikimedia and may fail due to network or browser policy. Playback, where available, uses browser speech synthesis and is explicitly labeled as such, not as a native-speaker recording.
 
+### Brand assets
+
+`public/icon.svg` is the approved master mark. `npm run generate:brand` derives the favicon, Apple and PWA icons, maskable icon, pinned-tab mark and share card in `public/brand/v2/`, and refreshes the original unversioned icon paths for existing installations. The share card uses DejaVu Sans and DejaVu Serif; install those fonts before regenerating it. The app uses the versioned URLs from `src/lib/brand.ts` so old browser or social caches do not silently serve an earlier mark. If the logo changes in future, update the generator to write a new version, update the shared URLs and service-worker asset list/cache version, and run the branding and offline tests.
+
+Browsers, installed apps and social platforms control their own icon and preview caches; updates can take time, and an installed app may need to be removed and added again. Updating the service worker retains previously cached lookup responses where possible, but old cached pages and bundles are refreshed; only previously cached pages and lookups may work offline.
+
 ## Deploy to Vercel from GitHub
 
 See the [Chinese deployment guide](docs/vercel-zh.md) for step-by-step setup and troubleshooting.
