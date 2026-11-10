@@ -1,4 +1,17 @@
 import { test, expect, type Page } from "@playwright/test";
+import { BRAND_ASSETS, BRAND_NAME } from "../../src/lib/brand";
+
+async function expectPageBrand(page: Page) {
+  for (const placement of ["header", "footer"] as const) {
+    const link = page.getByTestId(`${placement}-brand`);
+    await expect(link).toHaveAttribute("href", "/");
+    await expect(link).toHaveAttribute("aria-label", BRAND_NAME);
+    const logo = page.getByTestId(placement === "header" ? "brand-logo" : "footer-brand-logo");
+    await expect(logo).toBeVisible();
+    await expect(logo).toHaveAttribute("src", BRAND_ASSETS.mark);
+    await expect.poll(() => logo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+  }
+}
 
 async function blockWikimedia(page: Page) {
   await page.route("https://en.wiktionary.org/**", (route) => route.abort("failed"));
@@ -16,12 +29,8 @@ test.describe("Focused multilingual dictionary", () => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
-    const brand = page.getByRole("link", { name: "Vynalth Dictionary" });
-    await expect(brand).toHaveAttribute("href", "/");
+    await expectPageBrand(page);
     const logo = page.getByTestId("brand-logo");
-    await expect(logo).toBeVisible();
-    await expect(logo).toHaveAttribute("src", "/icon.svg");
-    await expect.poll(() => logo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
     await expect(page.getByTestId("hero-title")).toContainText("一个词");
     await expect(page.getByTestId("search-input")).toBeVisible();
     await expect(page.getByRole("link", { name: /favorites|收藏|learning|学习中心/i })).toHaveCount(0);
@@ -33,6 +42,7 @@ test.describe("Focused multilingual dictionary", () => {
     await page.getByTestId("theme-toggle").click();
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect(logo).toBeVisible();
+    await expect(page.getByTestId("footer-brand-logo")).toBeVisible();
     await page.getByTestId("theme-toggle").click();
     await expect(page.locator("html")).not.toHaveClass(/dark/);
     const sizes = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth }));
@@ -47,6 +57,7 @@ test.describe("Focused multilingual dictionary", () => {
     await expect(page.getByTestId("curated-matches")).toContainText("makanan");
     await page.getByTestId("curated-matches").getByRole("link", { name: "makanan", exact: true }).click();
     await expect(page.getByTestId("word-detail-headword")).toHaveText("makanan");
+    await expectPageBrand(page);
     await expect(page.getByTestId("malay-morphology-section")).toContainText("makan");
     await expect(page.getByTestId("word-provenance-card")).toContainText("CC BY-SA");
     await expect(page.getByTestId("tts-disclaimer")).toBeVisible();
@@ -130,6 +141,7 @@ test.describe("Focused multilingual dictionary", () => {
 
   test("sources, redirects, and browser history retain a dictionary-only experience", async ({ page }) => {
     await blockWikimedia(page); await page.goto("/sources");
+    await expectPageBrand(page);
     await expect(page.getByRole("heading", { name: "来源与许可" })).toBeVisible();
     await expect(page.getByText(/2,533,552/)).toBeVisible();
     await expect(page.getByRole("heading", { name: "人工审核的释义译文" })).toBeVisible();
@@ -141,6 +153,33 @@ test.describe("Focused multilingual dictionary", () => {
     await expect(page.getByTestId("search-input")).toHaveValue("makanan");
     await page.goto("/word/en/nonexistentwordxyz");
     await expect(page.getByTestId("word-not-found-view")).toContainText("does not mean the word does not exist");
+  });
+
+  test("brand-cache upgrades retain cached lookups without reviving stale logos", async ({ page, context }) => {
+    test.skip(process.env.TEST_OFFLINE !== "1", "Service-worker upgrade check runs against a production server");
+    // Seed the preceding service-worker cache on a same-origin non-app page,
+    // before the new app has a chance to register its worker.
+    await page.goto("/api/health");
+    await page.evaluate(async () => {
+      const cache = await caches.open("vynalth-dictionary-v4");
+      await cache.put("/api/definitions?q=legacy-cache-probe", new Response('{"source":"previous-cache"}', { headers: { "Content-Type": "application/json" } }));
+      await cache.put("/icon.svg", new Response("stale-logo"));
+    });
+    await blockWikimedia(page);
+    await page.goto("/");
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await expect.poll(() => page.evaluate(async () => (await caches.keys()).includes("vynalth-dictionary-v4"))).toBe(false);
+    await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+    await context.setOffline(true);
+    const offline = await page.evaluate(async (markUrl) => ({
+      lookup: await (await fetch("/api/definitions?q=legacy-cache-probe")).json(),
+      icon: await (await fetch("/icon.svg")).text(),
+      mark: await (await fetch(markUrl)).text(),
+    }), BRAND_ASSETS.mark);
+    expect(offline.lookup).toEqual({ source: "previous-cache" });
+    expect(offline.icon).not.toContain("stale-logo");
+    expect(offline.icon).toEqual(offline.mark);
+    await context.setOffline(false);
   });
 
   test("previously visited lookups work offline in a production build", async ({ page, context }) => {
@@ -155,11 +194,10 @@ test.describe("Focused multilingual dictionary", () => {
     await context.setOffline(true);
     await page.reload();
     await expect(page.getByTestId("offline-banner")).toBeVisible();
-    await expect(page.getByTestId("brand-logo")).toBeVisible();
-    const cachedIcons = await page.evaluate(async () => Promise.all(
-      ["/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"].map(async (path) => (await fetch(path)).ok)
-    ));
-    expect(cachedIcons).toEqual([true, true, true, true]);
+    await expectPageBrand(page);
+    const iconPaths = [...Object.values(BRAND_ASSETS), "/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.ico"];
+    const cachedIcons = await page.evaluate(async (paths) => Promise.all(paths.map(async (path) => (await fetch(path)).ok)), iconPaths);
+    expect(cachedIcons).toEqual(iconPaths.map(() => true));
     await expect(page.getByTestId("snapshot-definitions")).toContainText("reference work", { timeout: 15_000 });
     await context.setOffline(false);
   });

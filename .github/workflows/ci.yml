@@ -1,4 +1,4 @@
-name: Vynalth Lexicon CI
+name: Vynalth Dictionary CI
 
 on:
   push:

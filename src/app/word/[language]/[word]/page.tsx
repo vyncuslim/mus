@@ -7,6 +7,7 @@ import { analyzeMalayMorphology } from "@/lib/malay-morphology";
 import { WordDetailClient } from "@/components/WordDetailClient";
 import { ArrowLeft, GitBranch, SearchX } from "lucide-react";
 import { resolveSiteUrl } from "@/lib/site-url";
+import { BRAND_NAME, BRAND_SOCIAL_IMAGE } from "@/lib/brand";
 
 const SITE_URL = resolveSiteUrl();
 
@@ -57,10 +58,18 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: `${entry.headword} — ${langMeta.englishName} | Vynalth Lexicon`,
+      title: `${entry.headword} — ${langMeta.englishName} | ${BRAND_NAME}`,
       description: firstDef,
       url: `${SITE_URL}${canonicalPath}`,
       type: "article",
+      siteName: BRAND_NAME,
+      images: [BRAND_SOCIAL_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${entry.headword} — ${langMeta.englishName} | ${BRAND_NAME}`,
+      description: firstDef,
+      images: [BRAND_SOCIAL_IMAGE],
     },
   };
 }
@@ -174,7 +183,7 @@ export default async function WordDetailPage({
     description: entry.senses[0]?.definition,
     inDefinedTermSet: {
       "@type": "DefinedTermSet",
-      name: `Vynalth Lexicon (${entry.language.toUpperCase()})`,
+      name: `${BRAND_NAME} (${entry.language.toUpperCase()})`,
       url: `${SITE_URL}/dictionary?source=${entry.language}`,
     },
     termCode: entry.id,

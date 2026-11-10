@@ -46,7 +46,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("=== Vynalth Lexicon — Wiktextract JSONL Streaming Importer ===");
+  console.log("=== Vynalth Dictionary — Wiktextract JSONL Streaming Importer ===");
   console.log(`Input file:       ${inputPath}`);
   console.log(
     `Language filter:  ${allowedLanguages ? allowedLanguages.join(", ") : "ALL SUPPORTED"}`

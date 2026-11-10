@@ -10,6 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "vercel-build": "next build && node scripts/verify-deployment-traces.mjs",
+    "generate:brand": "node scripts/generate-brand-assets.mjs",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
@@ -31,6 +32,7 @@
     "postgres": "^3.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "sharp": "^0.35.5",
     "tailwind-merge": "^3.0.1",
     "zod": "^4.6.7"
   },
@@ -47,6 +49,7 @@
     "@sparticuz/chromium": "^153.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
