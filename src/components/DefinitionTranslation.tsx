@@ -144,7 +144,7 @@ export function DefinitionTranslationControls({ controller, locale, subjects }: 
     <div role="group" aria-label={copy.mode} className="mt-4 flex flex-wrap gap-2">
       {(["reviewed", "automatic"] as const).map((mode) => <button type="button" key={mode} data-testid={`${mode}-mode-button`} aria-pressed={controller.mode === mode} onClick={() => controller.setMode(mode)} className={`rounded-lg border px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-lexicon-500 ${controller.mode === mode ? "border-[#245e4e] bg-[#245e4e] text-white" : "border-[#c7d9ca] bg-white text-[#496b59] hover:border-[#7fa68c] dark:border-ink-700 dark:bg-ink-950 dark:text-ink-200"}`}>{copy[mode]}</button>)}
     </div>
-    <p data-testid="reviewed-coverage" className="mt-3 text-xs leading-5 text-[#617b69] dark:text-ink-400">{controller.target === "en" ? copy.original : copy.reviewedNote(reviewed.length, distinct.length)}</p>
+    <p data-testid="reviewed-coverage" className="mt-3 text-xs leading-5 text-[#556b5f] dark:text-ink-400">{controller.target === "en" ? copy.original : copy.reviewedNote(reviewed.length, distinct.length)}</p>
     {controller.mode === "automatic" && <p className="mt-2 text-xs leading-5 text-[#71897b] dark:text-ink-400">{copy.autoNote}</p>}
     {controller.progress && controller.mode === "automatic" && <p role="status" data-testid="definition-translation-progress" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#4a7962] dark:text-lexicon-400"><LoaderCircle className="h-3.5 w-3.5 animate-spin" />{copy.loading} {controller.progress.completed}/{controller.progress.total}</p>}
   </div>;
@@ -170,5 +170,5 @@ export function TranslatedDefinition({ controller, locale, subject }: { controll
 /** Existing source translations lack item-level review evidence; open only on request. */
 export function UnreviewedSourceDetails({ locale, kind, children, testId }: { locale: UiLocale; kind: "words" | "definitions" | "examples" | "notes"; children: ReactNode; testId?: string }) {
   const copy = TEXT[locale], title = kind === "words" ? copy.sourceWords : kind === "definitions" ? copy.sourceDefinitions : kind === "examples" ? copy.sourceExamples : copy.sourceNotes;
-  return <details data-testid={testId} className="mt-3 text-sm"><summary className="w-fit cursor-pointer text-xs font-semibold text-[#668679] hover:underline dark:text-lexicon-400">{title}</summary><p className="mt-2 text-xs leading-5 text-[#88998e] dark:text-ink-400">{copy.sourceNote}</p><div className="mt-2">{children}</div></details>;
+  return <details data-testid={testId} className="mt-3 text-sm"><summary className="w-fit cursor-pointer text-xs font-semibold text-[#556b5f] hover:underline dark:text-lexicon-400">{title}</summary><p className="mt-2 text-xs leading-5 text-[#5d7568] dark:text-ink-400">{copy.sourceNote}</p><div className="mt-2">{children}</div></details>;
 }

@@ -36,7 +36,9 @@
 - `/api/health`：应返回 JSON 和 `status: "ok"`；没有数据库时使用内置数据是正常的。
 - `/api/definitions?q=mengikut`：检查本地词典释义索引。
 - `/api/world?q=water`：检查多语言词汇对照索引。
-- `/robots.txt` 和 `/sitemap.xml`：确认域名是自己的正式域名。
+- `/robots.txt`、`/sitemap.xml` 和 `/entries`：确认域名是自己的正式域名，网站地图仅列出部分可访问的结构化详情页。
+
+规范链接、预览环境、Cloudflare 爬虫规则以及搜索平台提交步骤见 [SEO 检查说明](seo-zh.md)。
 
 如果 API 返回 503，请查看 **Deployments → 对应部署 → Logs**，并确认 `data/` 文件没有被排除。定义快照约 88 MB（gzip）；`vercel-build` 会检查数据分片是否进入 Next.js 的函数追踪并预估大小，但实际函数包、冷启动、内存、流量和额度仍应在 Vercel 的 Resources / Usage 中核实。函数实例不共享内存中的请求限流计数，正式高流量场景需要共享限流方案。
 

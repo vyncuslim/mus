@@ -54,7 +54,7 @@ test("home, sources, word and missing-entry shares all use the same branded imag
   const origin = resolveSiteUrl();
   for (const path of ["/", "/sources", "/word/ms/makanan", "/word/en/nonexistentwordxyz", "/word/unsupported/word"]) {
     const response = await request.get(path);
-    expect(response.status(), path).toBe(200);
+    expect(response.status(), path).toBe(path.includes("nonexistentwordxyz") || path.includes("/unsupported/") ? 404 : 200);
     const document = metadataDocument(await response.text());
     const get = (selector: string) => document.querySelector(selector)?.getAttribute("content");
     expect(get('meta[property="og:site_name"]'), path).toBe(BRAND_NAME);
@@ -66,8 +66,8 @@ test("home, sources, word and missing-entry shares all use the same branded imag
     expect(get('meta[property="og:title"]'), path).not.toContain("Vynalth Lexicon");
   }
   const word = metadataDocument(await (await request.get("/word/ms/makanan")).text());
-  expect(word.querySelector('meta[property="og:title"]')?.getAttribute("content")).toContain("makanan — Bahasa Melayu | Vynalth Dictionary");
-  expect(word.querySelector('script[type="application/ld+json"]')?.textContent).toContain("Vynalth Dictionary (MS)");
+  expect(word.querySelector('meta[property="og:title"]')?.getAttribute("content")).toContain("makanan — Malay (Bahasa Melayu) meaning & definition | Vynalth Dictionary");
+  expect(word.querySelector('script[type="application/ld+json"]')?.textContent).toContain("Vynalth Dictionary");
   const social = await request.get(BRAND_ASSETS.social);
   expect(social.headers()["content-type"]).toContain("image/png");
   expect((await social.body()).subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));

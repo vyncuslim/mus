@@ -4,7 +4,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "@/db/schema";
 import { STARTER_LEXICON_ENTRIES } from "@/data/starter-lexicon";
-import { databaseCandidates, databaseCoverage, databaseWord } from "@/lib/dictionary-service";
+import { databaseCandidates, databaseCoverage, databaseIndexEntries, databaseWord } from "@/lib/dictionary-service";
 import { entrySearchKeys, readingKeys } from "@/lib/entry-search-keys";
 import { executeLexiconSearch } from "@/lib/search-engine";
 
@@ -67,5 +67,17 @@ describe("PostgreSQL search without the first-2,000-rows cap", () => {
     await client.exec("DROP TABLE lexicon_search_keys; ALTER TABLE lexicon_entries DROP COLUMN normalized_reading; ALTER TABLE lexicon_entries DROP COLUMN compact_reading;");
     expect((await databaseCandidates(db, "makanan")).some((entry) => entry.headword === "makanan")).toBe(true);
     expect((await databaseWord(db, "ms", "makanan")).entry?.headword).toBe("makanan");
+    const index = await databaseIndexEntries(db);
+    expect(index).toHaveLength(3);
+    for (const item of index) expect((await databaseWord(db, item.language, item.headword)).entry?.headword).toBe(item.headword);
+  });
+  it("gives exact headwords precedence over colliding slugs even past the candidate cap", async () => {
+    await client.exec(`
+      INSERT INTO lexicon_entries(id,slug,headword,normalized_headword,language,audio_locale,parts_of_speech,senses,provenance)
+      SELECT 'a-shadow-' || lpad(n::text, 3, '0'), 'real-headword', 'shadow-' || n, 'real-headword', 'en', 'en-US', '["noun"]'::jsonb, '[]'::jsonb, '{}'::jsonb FROM generate_series(1,110) n;
+      INSERT INTO lexicon_entries(id,slug,headword,normalized_headword,language,audio_locale,parts_of_speech,senses,provenance)
+      VALUES ('z-exact', 'different-slug', 'real-headword', 'real-headword', 'en', 'en-US', '["noun"]'::jsonb, '[]'::jsonb, '{}'::jsonb);
+    `);
+    expect((await databaseWord(db, "en", "real-headword")).entry?.id).toBe("z-exact");
   });
 });

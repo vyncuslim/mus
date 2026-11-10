@@ -83,13 +83,15 @@ export function WordDetailClient({
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Breadcrumb & Back Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/dictionary"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-600 dark:text-ink-300 hover:text-lexicon-700 dark:hover:text-lexicon-400 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t.nav.dictionary}</span>
-        </Link>
+        <nav aria-label={uiLocale === "zh-Hans" ? "面包屑导航" : uiLocale === "ms" ? "Navigasi jejak" : "Breadcrumb"} className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium text-ink-600 dark:text-ink-300">
+          <Link href="/" className="inline-flex items-center gap-1.5 hover:text-lexicon-700 dark:hover:text-lexicon-400">
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" /><span>{t.nav.dictionary}</span>
+          </Link>
+          <span aria-hidden="true" className="text-ink-400">/</span>
+          <Link href="/entries" className="hover:text-lexicon-700 dark:hover:text-lexicon-400">{uiLocale === "zh-Hans" ? "词条索引" : uiLocale === "ms" ? "Indeks entri" : "Dictionary entries"}</Link>
+          <span aria-hidden="true" className="text-ink-400">/</span>
+          <span lang={entry.language} dir="auto" className="max-w-full break-all text-ink-500 dark:text-ink-400">{entry.headword}</span>
+        </nav>
 
         <span className="text-xs font-mono text-ink-500 dark:text-ink-400">
           {dataSourceMode === "postgresql"
@@ -128,6 +130,7 @@ export function WordDetailClient({
             {/* Headword */}
             <h1
               data-testid="word-detail-headword"
+              lang={entry.language}
               dir={langMeta.direction}
               className="font-serif font-bold text-4xl sm:text-5xl text-ink-950 dark:text-white tracking-tight"
             >
@@ -424,7 +427,7 @@ export function WordDetailClient({
 
                 {/* Sense Definitions */}
                 <div className="space-y-2">
-                  <p className="text-base sm:text-lg font-medium text-ink-900 dark:text-white leading-relaxed">{sense.definition}</p>
+                  <p lang="en" dir="auto" className="text-base sm:text-lg font-medium text-ink-900 dark:text-white leading-relaxed">{sense.definition}</p>
                   <TranslatedDefinition controller={translator} locale={uiLocale} subject={curatedSubject(entry, sense)} />
                   {Object.entries(sense.localizedDefinitions).some(([, value]) => value && value !== sense.definition) && <UnreviewedSourceDetails key={translator.mode} locale={uiLocale} kind="definitions" testId="source-definitions">
                     <div className="flex flex-col gap-1 text-xs sm:text-sm text-ink-600 dark:text-ink-400">
