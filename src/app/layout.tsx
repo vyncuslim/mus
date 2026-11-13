@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./gradient-rollout.css";
 import { LexiconProvider } from "@/context/LexiconContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -27,5 +28,5 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: light)", color: "#245e4e" }, { media: "(prefers-color-scheme: dark)", color: "#020617" }], width: "device-width", initialScale: 1 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="zh-Hans" suppressHydrationWarning><body className="min-h-screen flex flex-col bg-[#fbfbf8] dark:bg-ink-950 text-ink-900 dark:text-ink-50 font-sans antialiased"><LexiconProvider><Navbar /><main className="flex-1">{children}</main><Footer /></LexiconProvider></body></html>;
+  return <html lang="zh-Hans" suppressHydrationWarning><head><script id="vynalth-gradient-rollout" dangerouslySetInnerHTML={{ __html: "(function(){var key='vynalth-gradient-v1';document.documentElement.dataset.vynGradient='new';try{var host=location.hostname.toLowerCase();var domain=(host==='vynalthai.com'||host.endsWith('.vynalthai.com'))?'; Domain=.vynalthai.com':'';document.cookie=key+'=new; Path=/; Max-Age=15552000; SameSite=Lax'+(location.protocol==='https:'?'; Secure':'')+domain;localStorage.setItem(key,'new');}catch(_){}})();" }} /></head><body className="min-h-screen flex flex-col bg-[#fbfbf8] dark:bg-ink-950 text-ink-900 dark:text-ink-50 font-sans antialiased"><LexiconProvider><Navbar /><main className="flex-1">{children}</main><Footer /></LexiconProvider></body></html>;
 }
