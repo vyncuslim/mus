@@ -62,3 +62,31 @@ html[data-vyn-gradient='new']:not(.dark) :is(input,select,textarea) {
 html[data-vyn-gradient='new']:not(.dark) ::selection {background:#D8EBC9;color:#203429;}
 html[data-vyn-gradient='new'].dark {--background:#14231A;--foreground:#EDF4E6;}
 html[data-vyn-gradient='new'].dark :is(header,nav,footer) {background:#1B3022;border-color:#36523E;}
+
+
+/* Every dictionary route uses the complete grass-green -> parchment canvas. */
+html[data-vyn-gradient='new']:not(.dark) {
+  --dictionary-full-canvas:linear-gradient(125deg,#73AE52 0%,#B6D28B 48%,#FBF1D7 100%);
+  --background:#DFEBCF;--foreground:#21392B;
+}
+html[data-vyn-gradient='new']:not(.dark) body,
+html[data-vyn-gradient='new']:not(.dark) :is(main,.dictionary-layout,.dictionary-page,.word-page,.search-page,.account-page) {
+  background:var(--dictionary-full-canvas);
+  background-attachment:fixed;color:#21392B;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(header,nav,footer,aside,.dictionary-header,.dictionary-sidebar) {
+  background:linear-gradient(115deg,rgba(221,239,200,.89),rgba(255,246,219,.91));
+  border-color:#B2C79E;color:#21392B;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(article,section,.entry-card,.word-card,.dictionary-card,.search-panel,.result-panel,.account-card) {
+  border-color:#B2C79E;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(.entry-card,.word-card,.dictionary-card,.search-panel,.result-panel,.account-card) {
+  background:rgba(255,251,232,.9);color:#21392B;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(input,select,textarea) {background:#FFFBEF;color:#21392B;border-color:#A4BE99;}
+/* Respect the user's explicit Dark Mode, while retaining green and parchment. */
+html[data-vyn-gradient='new'].dark body,
+html[data-vyn-gradient='new'].dark :is(main,.dictionary-page,.word-page) {
+  background:linear-gradient(125deg,#20382A,#33472A 53%,#4E4B37);color:#F3F3E9;
+}
