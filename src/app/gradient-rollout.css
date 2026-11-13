@@ -32,3 +32,33 @@ html[data-vyn-gradient='new'] :is(button,input,select) {border-radius:8px;}
 html[data-vyn-gradient='new'] :is(button,input,a):focus-visible {
   outline:2px solid #2C6642;outline-offset:3px;
 }
+
+
+/* Full dictionary identity across word view, search, language navigation and account. */
+html[data-vyn-gradient='new'] {
+  --dictionary-from:#73AE52;--dictionary-to:#FBF1D7;
+  --dictionary-brand-gradient:linear-gradient(125deg,#73AE52,#FBF1D7);
+  --brand-green:#2D6540;--brand-pale:#EEF4E6;
+}
+html[data-vyn-gradient='new']:not(.dark) {
+  --background:#FAFBF3;--foreground:#203429;color-scheme:light;
+}
+html[data-vyn-gradient='new']:not(.dark) body {
+  background:linear-gradient(150deg,rgba(115,174,82,.13),rgba(251,241,215,.23)),#FAFBF3;
+  color:#203429;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(header,nav,footer) {
+  background:#F5F8EC;color:#203429;border-color:#CFDCC7;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(main,article,.entry-card,.word-card,.dictionary-card,.search-panel,.result-panel,.account-card) {
+  border-color:#CFDCC7;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(.entry-card,.word-card,.dictionary-card,.search-panel,.result-panel,.account-card) {
+  background:#FFFDF8;color:#203429;box-shadow:none;border-radius:9px;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(input,select,textarea) {
+  background:#FFF;color:#203429;border-color:#B5C9AC;
+}
+html[data-vyn-gradient='new']:not(.dark) ::selection {background:#D8EBC9;color:#203429;}
+html[data-vyn-gradient='new'].dark {--background:#14231A;--foreground:#EDF4E6;}
+html[data-vyn-gradient='new'].dark :is(header,nav,footer) {background:#1B3022;border-color:#36523E;}
