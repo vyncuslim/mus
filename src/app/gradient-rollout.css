@@ -1,0 +1,19 @@
+/* Vynalth Dictionary · 40% cohort, fixed green → parchment palette. */
+html[data-vyn-gradient='new'] {
+  --dictionary-brand-gradient:linear-gradient(135deg,#73AE52 0%,#FBF1D7 100%);
+}
+html[data-vyn-gradient='new']:not(.dark) {
+  --background:#F9FAF1;--foreground:#172E24;
+}
+html[data-vyn-gradient='new']:not(.dark) body {
+  background:radial-gradient(ellipse at 6% 3%,rgba(115,174,82,.23),transparent 45%),
+    radial-gradient(ellipse at 99% 14%,rgba(251,241,215,.85),transparent 54%),#F9FAF1;
+}
+html[data-vyn-gradient='new']:not(.dark) main {
+  background:linear-gradient(150deg,rgba(115,174,82,.12),rgba(251,241,215,.35) 58%,transparent);
+}
+html[data-vyn-gradient='new'].dark body {
+  background:radial-gradient(ellipse at 5% 2%,rgba(115,174,82,.15),transparent 46%),
+    radial-gradient(ellipse at 95% 25%,rgba(251,241,215,.06),transparent 52%),#020617;
+}
+html[data-vyn-gradient='new'] :focus-visible {outline:2px solid #2F704A;outline-offset:3px;}
