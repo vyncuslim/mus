@@ -90,3 +90,90 @@ html[data-vyn-gradient='new'].dark body,
 html[data-vyn-gradient='new'].dark :is(main,.dictionary-page,.word-page) {
   background:linear-gradient(125deg,#20382A,#33472A 53%,#4E4B37);color:#F3F3E9;
 }
+
+
+/* GRADIENT COVERAGE V4 — 2026-11-15
+ * Single full-page product canvas. Existing old-cohort UI remains untouched.
+ * Previous page-local opaque backgrounds must not mask the full-site brand.
+ * Preserve semantic feedback (errors/warnings), text legibility and form state.
+ */
+html[data-vyn-gradient='new']:not(.dark) {
+  --vyn-unified-canvas:linear-gradient(125deg,#73AE52 0%,#B6D28B 50%,#FBF1D7 100%);
+  --vyn-unified-card:rgba(255,251,232,.92);
+  --vyn-unified-chrome:rgba(237,248,219,.90);
+  --vyn-unified-ink:#21392B;
+  --vyn-unified-border:rgba(48,92,57,.25);
+  --vyn-unified-accent:#2D6540;
+}
+html[data-vyn-gradient='new']:not(.dark) body {
+  min-height:100vh;
+  background:var(--vyn-unified-canvas) !important;
+  background-attachment:fixed !important;
+  color:var(--vyn-unified-ink);
+}
+/* The page gets its gradient from body ONCE; don't restart it on each nested frame. */
+html[data-vyn-gradient='new']:not(.dark) :is(main,.dictionary-layout,.dictionary-page,.word-page,.search-page,.account-page,.min-h-screen,.min-h-dvh) {
+  background:transparent !important;
+  color:var(--vyn-unified-ink);
+}
+html[data-vyn-gradient='new']:not(.dark) :is(main > div[class*='bg-'],main > section[class*='bg-'],.dictionary-page > section,.word-page,.search-page,.account-page) {
+  background:transparent !important;
+}
+/* Only top-level page shells with legacy Tailwind background utilities. */
+html[data-vyn-gradient='new']:not(.dark) main > :is(div,section)[class*='bg-']:not([role='dialog']),
+html[data-vyn-gradient='new']:not(.dark) #root > :is(div,section)[class*='bg-']:not([role='dialog']) {
+  background:transparent !important;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(header,nav,footer,aside,.dictionary-header,.dictionary-sidebar,.mobile-nav,.topbar) {
+  background:var(--vyn-unified-chrome);
+  border-color:var(--vyn-unified-border);
+  color:var(--vyn-unified-ink);
+}
+html[data-vyn-gradient='new']:not(.dark) :is(.entry-card,.word-card,.dictionary-card,.search-panel,.result-panel,.account-card,.modal-content,.dictionary-panel,.definition-card) {
+  background:var(--vyn-unified-card);
+  border-color:var(--vyn-unified-border);
+  color:var(--vyn-unified-ink);
+}
+html[data-vyn-gradient='new']:not(.dark) :is(.btn-primary,.button-primary,.primary-button) {
+  background:var(--vyn-unified-accent);
+  border-color:var(--vyn-unified-accent);
+  color:#fff;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(input:not([type='checkbox']):not([type='radio']),textarea,select) {
+  background:rgba(255,255,255,.94);
+  color:var(--vyn-unified-ink);
+  border-color:var(--vyn-unified-border);
+}
+html[data-vyn-gradient='new']:not(.dark) :is(dialog,[role='dialog'],[role='alertdialog'],[role='menu'],[role='listbox'],[data-radix-popper-content-wrapper]) {
+  color:var(--vyn-unified-ink);
+}
+/* Mobile: scroll normally and contain long code, translations and tables. */
+html[data-vyn-gradient='new']:not(.dark) :is(main,section,article,.card,.panel,.grid,.flex,.prose) {
+  min-width:0;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(pre,code,textarea,[role='textbox']) {
+  max-width:100%;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(pre,[data-language],[class*='code-block']) {
+  overflow-x:auto;
+}
+html[data-vyn-gradient='new']:not(.dark) :is(img,video,canvas,svg) {max-width:100%;}
+html[data-vyn-gradient='new']:not(.dark) :is(.prose,article,.card,.panel,[role='dialog']) {overflow-wrap:anywhere;}
+html[data-vyn-gradient='new']:not(.dark) #vyn-gradient-announce .vyn-ga-dialog,
+html[data-vyn-gradient='new']:not(.dark) #vyn-gradient-legacy-status > div {
+  max-height:calc(100dvh - 32px);
+  overflow-y:auto;
+}
+@media(max-width:767px) {
+  html[data-vyn-gradient='new']:not(.dark) body {background-attachment:scroll !important;}
+  html[data-vyn-gradient='new']:not(.dark) :is(main,section,article,.container,.page-content,.content-area,.card,.panel) {min-width:0;max-width:100%;}
+  html[data-vyn-gradient='new']:not(.dark) :is(table,pre) {display:block;max-width:100%;overflow-x:auto;}
+  html[data-vyn-gradient='new']:not(.dark) :is(input:not([type='checkbox']):not([type='radio']),textarea,select) {max-width:100%;}
+}
+
+/* Explicit dark mode: the product still reads as green + parchment. */
+html[data-vyn-gradient='new'].dark {
+  --vyn-unified-canvas:linear-gradient(125deg,#20382A,#33472A 53%,#4E4B37);
+}
+html[data-vyn-gradient='new'].dark body {background:var(--vyn-unified-canvas) !important;background-attachment:fixed !important;}
+html[data-vyn-gradient='new'].dark :is(main,.dictionary-page,.word-page,.search-page,.account-page) {background:transparent !important;}
