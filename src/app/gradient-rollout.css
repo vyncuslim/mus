@@ -112,7 +112,7 @@ html[data-vyn-gradient='new']:not(.dark) body {
   color:var(--vyn-unified-ink);
 }
 /* The page gets its gradient from body ONCE; don't restart it on each nested frame. */
-html[data-vyn-gradient='new']:not(.dark) :is(main,.dictionary-layout,.dictionary-page,.word-page,.search-page,.account-page,.min-h-screen,.min-h-dvh) {
+html[data-vyn-gradient='new']:not(.dark) :is(main,.dictionary-layout,.dictionary-page,.word-page,.search-page,.account-page,.min-h-screen,.min-h-dvh):not(body) {
   background:transparent !important;
   color:var(--vyn-unified-ink);
 }
