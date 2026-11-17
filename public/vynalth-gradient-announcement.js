@@ -50,7 +50,7 @@
   const seenKey = 'vynalth-gradient-celebrated-v3-' + product.replace(/[^a-z0-9-]/g, '-');
   const replayRequested = new URLSearchParams(location.search).get('vyn_celebrate') === '1';
   let alreadySeen = document.cookie.split(';').some(part => part.trim() === seenKey + '=1');
-  try { alreadySeen ||= localStorage.getItem(seenKey) === '1'; } catch (_) {}
+  try { alreadySeen ||= localStorage.getItem(seenKey) === '1'; } catch { /* Browser storage can be disabled; the cookie check remains the fallback. */ }
 
   // Already-seen visitors still get an unobtrusive, optional replay control.
 
@@ -106,7 +106,7 @@
       document.cookie = seenKey + '=1; Path=/; Max-Age=31536000; SameSite=Lax' +
         (location.protocol === 'https:' ? '; Secure' : '') + domain;
       localStorage.setItem(seenKey, '1');
-    } catch (_) {}
+    } catch { /* Browser storage can be disabled; the cookie check remains the fallback. */ }
   };
   const show = () => {
     if (document.getElementById('vyn-gradient-announce')) return;
@@ -163,7 +163,7 @@
       try {
         await navigator.clipboard.writeText(caption);
         instagram.textContent = 'Caption copied ✓';
-      } catch (_) {
+      } catch {
         instagram.textContent = 'Copy unavailable';
       }
     });
